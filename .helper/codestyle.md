@@ -17,5 +17,4 @@
 - Tailwind only — no external component libraries
 
 ## Currency
-- All amounts in VND integers (no floats)
-- Display unit: "candies (🍭)" — 1 candy = 1,000 VND
+- All amounts in candies (🍭), integers only (no floats)

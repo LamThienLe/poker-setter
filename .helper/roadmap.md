@@ -10,7 +10,7 @@
 ## Phase 2 — Settlement Calculation ✅
 - Net balance: chips_out − (buy_ins × buy_in_amount)
 - Minimum-transfer algorithm (greedy debt simplification)
-- Results screen: "X pays Y → amount 🍭"
+- Results screen: "X pays Y → 🍭 amount"
 
 ## Phase 3 — Mobile Polish ✅
 - Large tap targets, thumb-friendly layout
