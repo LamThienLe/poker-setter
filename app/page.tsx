@@ -5,22 +5,58 @@ import { PLAYER_NAMES, BUY_IN_OPTIONS, type Player } from "@/lib/types";
 import { calculateSettlements } from "@/lib/settle";
 
 
-function todayLabel() {
-  return new Date().toLocaleDateString("en-GB", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-}
-
-
 function generateId() {
   return Math.random().toString(36).slice(2, 9);
 }
 
 
-function PlayerCard({
+function BuyInStage({
+  onConfirm,
+}: {
+  onConfirm: (amount: number) => void;
+}) {
+  const [selected, setSelected] = useState<number>(200);
+
+  return (
+    <main className="min-h-dvh flex flex-col items-center justify-center px-6 gap-10">
+      <h1 className="text-3xl font-bold text-white tracking-tight">
+        🃏 Poker Night
+      </h1>
+
+      <div className="w-full max-w-xs space-y-3">
+        <p className="text-xs text-slate-400 uppercase tracking-widest text-center font-medium">
+          Buy-in amount
+        </p>
+        <div className="flex gap-3">
+          {BUY_IN_OPTIONS.map((amount) => (
+            <button
+              key={amount}
+              onClick={() => setSelected(amount)}
+              className={`flex-1 py-4 rounded-2xl text-lg font-bold transition-colors ${
+                selected === amount
+                  ? "bg-violet-600 text-white"
+                  : "bg-slate-800 text-slate-300 active:bg-slate-700"
+              }`}
+            >
+              {amount}
+              <span className="block text-xs font-normal mt-0.5 opacity-70">🍭</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <button
+        onClick={() => onConfirm(selected)}
+        className="w-full max-w-xs py-4 rounded-2xl bg-violet-600 text-white text-xl font-bold active:bg-violet-700"
+      >
+        Let&apos;s play
+      </button>
+    </main>
+  );
+}
+
+
+function PlayerRow({
   player,
   usedNames,
   onUpdate,
@@ -29,326 +65,285 @@ function PlayerCard({
 }: {
   player: Player;
   usedNames: Set<string>;
-  onUpdate: (updated: Partial<Player>) => void;
+  onUpdate: (updates: Partial<Player>) => void;
   onRemove: () => void;
   locked: boolean;
 }) {
   const availableNames = PLAYER_NAMES.filter(
-    (n) => n === player.name || !usedNames.has(n)
+    (name) => name === player.name || !usedNames.has(name)
   );
 
   return (
-    <div
-      className={`rounded-2xl p-4 space-y-3 ${
-        locked ? "bg-slate-800/50 opacity-70" : "bg-slate-800"
-      }`}
-    >
-      <div className="flex items-center justify-between gap-2">
-        <select
-          value={player.name}
-          disabled={locked}
-          onChange={(e) => onUpdate({ name: e.target.value })}
-          className="flex-1 bg-slate-700 text-white rounded-xl px-3 py-3 text-base font-semibold disabled:cursor-not-allowed"
+    <div className="flex items-center gap-2 py-2 border-b border-slate-800 last:border-b-0">
+      <select
+        value={player.name}
+        disabled={locked}
+        onChange={(e) => onUpdate({ name: e.target.value })}
+        className="w-24 shrink-0 bg-slate-800 text-white rounded-lg px-2 py-2 text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
+      >
+        {availableNames.map((name) => (
+          <option key={name} value={name}>
+            {name}
+          </option>
+        ))}
+      </select>
+
+      <div className="flex items-center gap-1 shrink-0">
+        <button
+          disabled={locked || player.buyIns <= 1}
+          onClick={() => onUpdate({ buyIns: player.buyIns - 1 })}
+          className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800 text-slate-300 text-lg font-bold disabled:opacity-30 active:bg-slate-700 touch-manipulation"
+          style={{ minWidth: 44, minHeight: 44 }}
         >
-          {availableNames.map((n) => (
-            <option key={n} value={n}>
-              {n}
-            </option>
-          ))}
-        </select>
-
-        {!locked && (
-          <button
-            onClick={onRemove}
-            className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-700 text-slate-400 active:bg-red-900 active:text-red-300 text-xl leading-none"
-          >
-            ×
-          </button>
-        )}
-      </div>
-
-      <div className="space-y-1">
-        <label className="text-xs text-slate-400 font-medium">
-          Total buy-ins{" "}
-          <span className="text-slate-500">(1 start + 2 rebuys = 3)</span>
-        </label>
-        <div className="flex items-center gap-3">
-          <button
-            disabled={locked || player.buyIns <= 1}
-            onClick={() => onUpdate({ buyIns: player.buyIns - 1 })}
-            className="w-12 h-12 rounded-xl bg-slate-700 text-2xl font-bold disabled:opacity-30 active:bg-slate-600 flex items-center justify-center leading-none"
-          >
-            −
-          </button>
-          <span className="flex-1 text-center text-2xl font-bold tabular-nums">
-            {player.buyIns}
-          </span>
-          <button
-            disabled={locked}
-            onClick={() => onUpdate({ buyIns: player.buyIns + 1 })}
-            className="w-12 h-12 rounded-xl bg-slate-700 text-2xl font-bold disabled:opacity-30 active:bg-slate-600 flex items-center justify-center leading-none"
-          >
-            +
-          </button>
-        </div>
-      </div>
-
-      <div className="space-y-1">
-        <label className="text-xs text-slate-400 font-medium">
-          Final chip count 🍭
-        </label>
-        <input
-          type="number"
-          inputMode="numeric"
-          pattern="[0-9]*"
+          −
+        </button>
+        <span className="w-5 text-center text-sm font-bold tabular-nums text-white">
+          {player.buyIns}
+        </span>
+        <button
           disabled={locked}
-          value={player.chips}
-          onChange={(e) => onUpdate({ chips: e.target.value })}
-          placeholder="e.g. 350"
-          className="w-full bg-slate-700 text-white rounded-xl px-4 py-3 text-lg font-semibold placeholder-slate-500 disabled:cursor-not-allowed disabled:opacity-60"
-        />
+          onClick={() => onUpdate({ buyIns: player.buyIns + 1 })}
+          className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800 text-slate-300 text-lg font-bold disabled:opacity-30 active:bg-slate-700 touch-manipulation"
+          style={{ minWidth: 44, minHeight: 44 }}
+        >
+          +
+        </button>
       </div>
+
+      <input
+        type="number"
+        inputMode="numeric"
+        pattern="[0-9]*"
+        disabled={locked}
+        value={player.chips}
+        onChange={(e) => onUpdate({ chips: e.target.value })}
+        placeholder="chips"
+        className="flex-1 min-w-0 bg-slate-800 text-white rounded-lg px-2 py-2 text-sm font-semibold placeholder-slate-600 disabled:opacity-60 disabled:cursor-not-allowed"
+      />
 
       {!locked && (
         <button
-          disabled={!player.chips || Number(player.chips) < 0}
-          onClick={() => onUpdate({ submitted: true })}
-          className="w-full py-3 rounded-xl bg-emerald-600 text-white font-bold text-base active:bg-emerald-700 disabled:opacity-30 disabled:cursor-not-allowed"
+          onClick={onRemove}
+          className="w-7 h-7 flex items-center justify-center rounded-full bg-slate-800 text-slate-500 active:bg-red-900 active:text-red-300 text-base leading-none shrink-0 touch-manipulation"
+          style={{ minWidth: 44, minHeight: 44 }}
         >
-          Submit
+          ×
         </button>
       )}
 
       {locked && (
-        <button
-          onClick={() => onUpdate({ submitted: false })}
-          className="w-full py-2 rounded-xl border border-slate-600 text-slate-400 text-sm active:bg-slate-700"
-        >
-          Edit
-        </button>
+        <div className="w-7 shrink-0" style={{ minWidth: 44 }} />
       )}
     </div>
   );
 }
 
 
-function SettlementResult({
+function SettlementPanel({
   players,
   buyInAmount,
 }: {
   players: Player[];
   buyInAmount: number;
 }) {
-  const submitted = players.filter((p) => p.submitted && p.chips !== "");
-  if (submitted.length < 2) return null;
-
   const transfers = calculateSettlements(
-    submitted.map((p) => ({
-      name: p.name,
-      buyIns: p.buyIns,
-      chips: Number(p.chips),
+    players.map((player) => ({
+      name: player.name,
+      buyIns: player.buyIns,
+      chips: Number(player.chips),
     })),
     buyInAmount
   );
 
-  const totalChipsIn = submitted.reduce(
-    (s, p) => s + p.buyIns * buyInAmount,
+  const totalChipsIn = players.reduce(
+    (sum, player) => sum + player.buyIns * buyInAmount,
     0
   );
-  const totalChipsOut = submitted.reduce((s, p) => s + Number(p.chips), 0);
-  const balanced = totalChipsIn === totalChipsOut;
+  const totalChipsOut = players.reduce(
+    (sum, player) => sum + Number(player.chips),
+    0
+  );
+  const isBalanced = totalChipsIn === totalChipsOut;
+
+  const netResults = players
+    .map((player) => ({
+      name: player.name,
+      net: Number(player.chips) - player.buyIns * buyInAmount,
+    }))
+    .sort((a, b) => b.net - a.net);
 
   return (
-    <div className="rounded-2xl bg-slate-800 p-4 space-y-4">
-      <h2 className="text-lg font-bold text-white">Settlement 💸</h2>
-
-      {!balanced && (
-        <p className="text-xs text-amber-400 bg-amber-900/30 rounded-lg px-3 py-2">
-          ⚠️ Chips in ({totalChipsIn.toLocaleString()} 🍭) ≠ chips out (
-          {totalChipsOut.toLocaleString()} 🍭). Check everyone&apos;s counts.
+    <div className="space-y-4 pt-2">
+      {!isBalanced && (
+        <p className="text-xs text-amber-400 bg-amber-900/30 rounded-xl px-3 py-2">
+          Chips in ({totalChipsIn.toLocaleString()} 🍭) does not equal chips out (
+          {totalChipsOut.toLocaleString()} 🍭) — double-check counts.
         </p>
       )}
 
-      {transfers.length === 0 ? (
-        <p className="text-slate-400 text-sm">Everyone is even 🎉</p>
-      ) : (
-        <div className="space-y-2">
-          {transfers.map((t, i) => (
+      <div className="rounded-2xl bg-slate-800 p-4 space-y-2">
+        <p className="text-xs text-slate-500 uppercase tracking-widest font-medium mb-3">
+          Transfers
+        </p>
+        {transfers.length === 0 ? (
+          <p className="text-slate-400 text-sm">Everyone is even 🎉</p>
+        ) : (
+          transfers.map((transfer, index) => (
             <div
-              key={i}
-              className="flex items-center gap-2 bg-slate-700/60 rounded-xl px-4 py-3"
+              key={index}
+              className="flex items-center gap-2 bg-slate-700/60 rounded-xl px-3 py-2.5"
             >
-              <span className="font-semibold text-red-400">{t.from}</span>
+              <span className="font-semibold text-red-400 text-sm">
+                {transfer.from}
+              </span>
               <span className="text-slate-500 text-xs">→</span>
-              <span className="font-semibold text-emerald-400">{t.to}</span>
-              <span className="ml-auto font-bold text-white tabular-nums">
-                {t.amount.toLocaleString()} 🍭
+              <span className="font-semibold text-emerald-400 text-sm">
+                {transfer.to}
+              </span>
+              <span className="ml-auto font-bold text-white tabular-nums text-sm">
+                {transfer.amount.toLocaleString()} 🍭
               </span>
             </div>
-          ))}
-        </div>
-      )}
+          ))
+        )}
+      </div>
 
-      <div className="border-t border-slate-700 pt-3 space-y-1">
-        <p className="text-xs text-slate-500 font-medium uppercase tracking-wider mb-2">
+      <div className="rounded-2xl bg-slate-800 p-4 space-y-1">
+        <p className="text-xs text-slate-500 uppercase tracking-widest font-medium mb-3">
           Net result
         </p>
-        {submitted
-          .map((p) => ({
-            name: p.name,
-            net: Number(p.chips) - p.buyIns * buyInAmount,
-          }))
-          .sort((a, b) => b.net - a.net)
-          .map((p) => (
-            <div key={p.name} className="flex justify-between text-sm py-0.5">
-              <span className="text-slate-300">{p.name}</span>
-              <span
-                className={
-                  p.net > 0
-                    ? "text-emerald-400 font-semibold"
-                    : p.net < 0
-                    ? "text-red-400 font-semibold"
-                    : "text-slate-400"
-                }
-              >
-                {p.net > 0 ? "+" : ""}
-                {p.net.toLocaleString()} 🍭
-              </span>
-            </div>
-          ))}
+        {netResults.map((result) => (
+          <div
+            key={result.name}
+            className="flex justify-between text-sm py-1"
+          >
+            <span className="text-slate-300">{result.name}</span>
+            <span
+              className={
+                result.net > 0
+                  ? "text-emerald-400 font-semibold"
+                  : result.net < 0
+                  ? "text-red-400 font-semibold"
+                  : "text-slate-400"
+              }
+            >
+              {result.net > 0 ? "+" : ""}
+              {result.net.toLocaleString()} 🍭
+            </span>
+          </div>
+        ))}
       </div>
     </div>
   );
 }
 
 
-export default function Home() {
-  const [buyInAmount, setBuyInAmount] = useState<number>(200);
+function GameStage({ buyInAmount }: { buyInAmount: number }) {
   const [players, setPlayers] = useState<Player[]>([]);
-  const [addingName, setAddingName] = useState<string>(PLAYER_NAMES[0]);
+  const [settled, setSettled] = useState(false);
 
-  const usedNames = new Set(players.map((p) => p.name));
-  const availableToAdd = PLAYER_NAMES.filter((n) => !usedNames.has(n));
+  const usedNames = new Set(players.map((player) => player.name));
+  const availableNames = PLAYER_NAMES.filter((name) => !usedNames.has(name));
 
   function addPlayer() {
-    const name = addingName || availableToAdd[0];
-    if (!name) return;
-    setPlayers((prev) => [
-      ...prev,
-      { id: generateId(), name, buyIns: 1, chips: "", submitted: false },
+    const nextName = availableNames[0];
+    if (!nextName) return;
+    setPlayers((previous) => [
+      ...previous,
+      { id: generateId(), name: nextName, buyIns: 1, chips: "", submitted: false },
     ]);
-    const remaining = availableToAdd.filter((n) => n !== name);
-    if (remaining.length > 0) setAddingName(remaining[0]);
   }
 
   function updatePlayer(id: string, updates: Partial<Player>) {
-    setPlayers((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, ...updates } : p))
+    setPlayers((previous) =>
+      previous.map((player) => (player.id === id ? { ...player, ...updates } : player))
     );
   }
 
   function removePlayer(id: string) {
-    setPlayers((prev) => prev.filter((p) => p.id !== id));
+    setPlayers((previous) => previous.filter((player) => player.id !== id));
   }
 
-  const allSubmitted =
-    players.length >= 2 && players.every((p) => p.submitted);
-  const submittedCount = players.filter((p) => p.submitted).length;
+  function handleSettle() {
+    setPlayers((previous) =>
+      previous.map((player) => ({ ...player, submitted: true }))
+    );
+    setSettled(true);
+  }
+
+  const canSettle =
+    players.length >= 2 &&
+    players.every((player) => player.chips !== "" && Number(player.chips) >= 0);
+
+  const settledPlayers = players.filter((player) => player.submitted);
 
   return (
-    <main className="max-w-md mx-auto px-4 py-6 space-y-5 pb-20">
-      <div className="space-y-0.5">
-        <h1 className="text-2xl font-bold text-white">🃏 Poker Settler</h1>
-        <p className="text-slate-400 text-sm">{todayLabel()}</p>
+    <main className="max-w-md mx-auto px-4 pt-4 pb-24 min-h-dvh">
+      <div className="flex items-center justify-between mb-4">
+        <span className="text-xs text-slate-500 font-medium">
+          Buy-in: {buyInAmount} 🍭
+        </span>
+        <button
+          onClick={addPlayer}
+          disabled={availableNames.length === 0 || settled}
+          className="w-9 h-9 flex items-center justify-center rounded-xl bg-violet-600 text-white text-xl font-bold disabled:opacity-30 active:bg-violet-700 touch-manipulation"
+          style={{ minWidth: 44, minHeight: 44 }}
+          aria-label="Add player"
+        >
+          +
+        </button>
       </div>
 
-      <div className="rounded-2xl bg-slate-800 p-4 space-y-2">
-        <label className="text-xs text-slate-400 font-medium uppercase tracking-wider">
-          Buy-in amount
-        </label>
-        <div className="flex gap-2">
-          {BUY_IN_OPTIONS.map((amount) => (
-            <button
-              key={amount}
-              onClick={() => setBuyInAmount(amount)}
-              className={`flex-1 py-3 rounded-xl text-base font-bold transition-colors ${
-                buyInAmount === amount
-                  ? "bg-violet-600 text-white"
-                  : "bg-slate-700 text-slate-300 active:bg-slate-600"
-              }`}
-            >
-              {amount} 🍭
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {players.length > 0 && (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xs font-medium text-slate-400 uppercase tracking-wider">
-              Players
-            </h2>
-            <span className="text-xs text-slate-500">
-              {submittedCount}/{players.length} submitted
-            </span>
+      {players.length === 0 ? (
+        <p className="text-center text-slate-600 text-sm py-16">
+          Tap + to add players as they sit down
+        </p>
+      ) : (
+        <div className="mb-6">
+          <div className="flex items-center gap-2 px-0 py-1 mb-1">
+            <span className="w-24 shrink-0 text-xs text-slate-600 font-medium">Name</span>
+            <span className="w-28 shrink-0 text-xs text-slate-600 font-medium text-center">Buy-ins</span>
+            <span className="flex-1 text-xs text-slate-600 font-medium">Chips</span>
           </div>
           {players.map((player) => (
-            <PlayerCard
+            <PlayerRow
               key={player.id}
               player={player}
               usedNames={usedNames}
               onUpdate={(updates) => updatePlayer(player.id, updates)}
               onRemove={() => removePlayer(player.id)}
-              locked={player.submitted}
+              locked={settled}
             />
           ))}
         </div>
       )}
 
-      {availableToAdd.length > 0 && (
-        <div className="rounded-2xl bg-slate-800 p-4 space-y-3">
-          <p className="text-xs text-slate-400 font-medium uppercase tracking-wider">
-            Add player to table
-          </p>
-          <div className="flex gap-2">
-            <select
-              value={addingName}
-              onChange={(e) => setAddingName(e.target.value)}
-              className="flex-1 bg-slate-700 text-white rounded-xl px-3 py-3 text-base font-semibold"
-            >
-              {availableToAdd.map((n) => (
-                <option key={n} value={n}>
-                  {n}
-                </option>
-              ))}
-            </select>
+      {settled && settledPlayers.length >= 2 ? (
+        <SettlementPanel players={settledPlayers} buyInAmount={buyInAmount} />
+      ) : (
+        <div className="fixed bottom-0 left-0 right-0 px-4 pb-8 pt-3 bg-gradient-to-t from-slate-900 via-slate-900/90 to-transparent">
+          <div className="max-w-md mx-auto">
             <button
-              onClick={addPlayer}
-              className="px-5 py-3 rounded-xl bg-violet-600 text-white font-bold text-base active:bg-violet-700"
+              disabled={!canSettle}
+              onClick={handleSettle}
+              className="w-full py-4 rounded-2xl bg-violet-600 text-white text-xl font-bold disabled:opacity-25 disabled:cursor-not-allowed active:bg-violet-700 transition-opacity"
             >
-              + Add
+              GG 🃏
             </button>
           </div>
         </div>
       )}
-
-      {players.length === 0 && (
-        <p className="text-center text-slate-500 text-sm py-10">
-          Add players as they sit down 👆
-        </p>
-      )}
-
-      {!allSubmitted && submittedCount > 0 && submittedCount < players.length && (
-        <p className="text-center text-slate-500 text-sm">
-          Waiting for {players.length - submittedCount} more player
-          {players.length - submittedCount > 1 ? "s" : ""} to submit…
-        </p>
-      )}
-
-      {allSubmitted && (
-        <SettlementResult players={players} buyInAmount={buyInAmount} />
-      )}
     </main>
   );
+}
+
+
+export default function Home() {
+  const [buyInAmount, setBuyInAmount] = useState<number | null>(null);
+
+  if (buyInAmount === null) {
+    return <BuyInStage onConfirm={(amount) => setBuyInAmount(amount)} />;
+  }
+
+  return <GameStage buyInAmount={buyInAmount} />;
 }
