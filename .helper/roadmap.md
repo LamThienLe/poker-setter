@@ -2,7 +2,7 @@
 
 ## Phase 1 — Core UI ✅
 - Today's game page with buy-in amount selector (candies 🍭)
-- Fixed player name dropdown (AJ, Damien, Dani, Elliot, Gaby, Jack, Kevin, Lam, Leon, Nikita, Pascal, Remi, Ronan, Tarek)
+- Fixed player name dropdown (AJ, Antoine, Damien, Dani, Elliot, Gaby, Jack, Kevin, Lam, Leon, Nikita, Pascal, Remi, Ronan, Tarek)
 - Add players dynamically as they join the table
 - Per-player: rebuy counter (+/- buttons), final chip count input
 - Edit anytime before submit; grey-out after submit

@@ -1,5 +1,6 @@
 export const PLAYER_NAMES = [
   "AJ",
+  "Antoine",
   "Damien",
   "Dani",
   "Elliot",

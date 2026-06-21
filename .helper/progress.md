@@ -1,8 +1,16 @@
 # Progress
 
 ## 2026-06-20
-- Project initialized with Next.js + Tailwind
-- git init on `railway` branch
-- Built core UI: today's page, player management, rebuy counter, chip input
-- Settlement algorithm implemented (minimum transfers)
-- Mobile-first polish applied
+- Project initialized with Next.js + Tailwind, committed on `railway` branch
+- Core UI: today's page, dynamic player add, buy-in selector (200/250/500 🍭), rebuy +/− counter, chip input
+- Settlement algorithm: greedy minimum-transfer, net leaderboard, ⚠️ imbalance warning
+- Cards grey out after submit, Edit button to unlock
+- Mobile-first: large tap targets, numeric keyboard, dark theme
+- Build passing — ready for Mr. Lam to push from home and deploy on Railway
+- Supabase Realtime integrated: shared game sessions via /game/[code], live sync across all phones
+- Redesigned to 2-stage flow: buy-in picker → compact game screen with thin player rows
+- GG button settles and locks the game for all connected devices simultaneously
+- Pending: Phase 4 stats dashboard, Phase 5 Railway deploy
+
+## 2026-06-21
+- Added Antoine to player list (alphabetical)
