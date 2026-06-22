@@ -31,3 +31,4 @@
 - Total pot card added on the live table — shows total buy-ins × buy-in amount for the current session
 - Checked helper docs and refreshed roadmap/progress to match the real project state
 - Phase 5 marked done per Mr. Lam's deployment confirmation
+- Cleaned up the live table top section — split actions, add-player control, and total-pot card into clearer rows with more spacing

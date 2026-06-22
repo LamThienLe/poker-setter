@@ -312,60 +312,61 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
 
   return (
     <main className="max-w-md mx-auto px-4 py-5 pb-32">
-      <div className="flex items-center justify-between mb-4">
+      <div className="mb-5 space-y-3">
         <div>
           <h1 className="text-lg font-bold text-white">🃏 Poker Night</h1>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-500 mt-1">
             {game.buy_in} 🍭 buy-in · code: <span className="font-mono text-slate-400">{code}</span>
           </p>
         </div>
-        <div className="flex items-center gap-2">
+
+        <div className="grid grid-cols-2 gap-2">
           <button
             onClick={copyGameLink}
-            className={`px-3 h-10 flex items-center justify-center rounded-xl text-sm font-semibold touch-manipulation ${
+            className={`h-11 rounded-2xl text-sm font-semibold touch-manipulation ${
               hasCopiedLink
                 ? "bg-emerald-600 text-white"
                 : "bg-slate-800 text-slate-300 active:bg-slate-700"
             }`}
           >
-            {hasCopiedLink ? "✅ Copied" : "🔗 Copy"}
+            {hasCopiedLink ? "✅ Copied" : "🔗 Copy link"}
           </button>
           <button
             onClick={openStats}
-            className="px-3 h-10 flex items-center justify-center rounded-xl bg-slate-800 text-slate-300 text-sm font-semibold active:bg-slate-700 touch-manipulation"
+            className="h-11 rounded-2xl bg-slate-800 text-slate-300 text-sm font-semibold active:bg-slate-700 touch-manipulation"
           >
             📊 Stats
           </button>
-          {availableToAdd.length > 0 && !locked && (
-            <>
-              <select
-                value={addingName}
-                onChange={(e) => setAddingName(e.target.value)}
-                className="bg-slate-800 text-white rounded-lg px-2 py-2 text-sm font-semibold"
-              >
-                {availableToAdd.map((n) => (
-                  <option key={n} value={n}>{n}</option>
-                ))}
-              </select>
-              <button
-                onClick={addPlayer}
-                className="w-10 h-10 flex items-center justify-center rounded-xl bg-violet-600 text-white text-xl font-bold active:bg-violet-700 touch-manipulation"
-              >
-                +
-              </button>
-            </>
-          )}
         </div>
-      </div>
 
-      <div className="rounded-2xl bg-slate-800 px-4 py-3 mb-4 flex items-center justify-between gap-3">
-        <div>
+        {availableToAdd.length > 0 && !locked && (
+          <div className="rounded-2xl bg-slate-800 p-2 flex items-center gap-2">
+            <select
+              value={addingName}
+              onChange={(e) => setAddingName(e.target.value)}
+              className="flex-1 min-w-0 bg-slate-900 text-white rounded-xl px-3 py-3 text-sm font-semibold"
+            >
+              {availableToAdd.map((name) => (
+                <option key={name} value={name}>{name}</option>
+              ))}
+            </select>
+            <button
+              onClick={addPlayer}
+              className="px-4 h-11 flex items-center justify-center rounded-xl bg-violet-600 text-white text-sm font-bold active:bg-violet-700 touch-manipulation shrink-0"
+            >
+              Add
+            </button>
+          </div>
+        )}
+
+        <div className="rounded-3xl bg-slate-800 px-4 py-4">
           <p className="text-xs text-slate-500 uppercase tracking-widest font-medium">Total pot</p>
-          <p className="text-white text-xl font-bold tabular-nums">{totalPot.toLocaleString()} 🍭</p>
-        </div>
-        <div className="text-right">
-          <p className="text-xs text-slate-500 uppercase tracking-widest font-medium">Buy-ins</p>
-          <p className="text-slate-300 text-sm font-semibold tabular-nums">{totalBuyIns.toLocaleString()}</p>
+          <div className="flex items-end justify-between gap-3 mt-2">
+            <p className="text-white text-2xl font-bold tabular-nums">{totalPot.toLocaleString()} 🍭</p>
+            <p className="text-sm text-slate-400 text-right tabular-nums">
+              {totalBuyIns.toLocaleString()} buy-ins
+            </p>
+          </div>
         </div>
       </div>
 
