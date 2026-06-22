@@ -2,6 +2,7 @@
 
 import { use, useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { QRCodeSVG } from "qrcode.react";
 import { supabase } from "@/lib/supabase";
 import { type GameRow } from "@/lib/game";
 import { PLAYER_NAMES, type Player } from "@/lib/types";
@@ -13,6 +14,8 @@ import {
   ChartBarIcon,
   ExclamationTriangleIcon,
   FaceSmileIcon,
+  QrCodeIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 
 
@@ -163,6 +166,32 @@ function SettlementPanel({
 }
 
 
+function QRModal({ url, onClose }: { url: string; onClose: () => void }) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-6"
+      onClick={onClose}
+    >
+      <div
+        className="bg-slate-800 rounded-3xl p-6 flex flex-col items-center gap-4 w-full max-w-xs"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between w-full">
+          <p className="text-white font-bold text-sm">Scan to join</p>
+          <button onClick={onClose} className="text-slate-400 active:text-white">
+            <XMarkIcon className="w-5 h-5" />
+          </button>
+        </div>
+        <div className="bg-white p-4 rounded-2xl">
+          <QRCodeSVG value={url} size={200} />
+        </div>
+        <p className="text-slate-400 text-xs font-mono">{url}</p>
+      </div>
+    </div>
+  );
+}
+
+
 export default function GamePage({ params }: { params: Promise<{ code: string }> }) {
   const { code } = use(params);
   const router = useRouter();
@@ -170,6 +199,7 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
   const [game, setGame] = useState<GameRow | null>(null);
   const [addingName, setAddingName] = useState<string>(PLAYER_NAMES[0]);
   const [hasCopiedLink, setHasCopiedLink] = useState(false);
+  const [showQR, setShowQR] = useState(false);
   const pendingWrite = useRef(false);
   const copyResetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -319,7 +349,14 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
   const canSettle = game.players.length >= 2 && game.players.every((p) => p.chips !== "");
   const locked = pageState === "settled";
 
+  const gameUrl = typeof window !== "undefined" ? `${window.location.origin}/game/${code}` : "";
+  const totalChipsOut = game.players.reduce((s, p) => s + Number(p.chips || 0), 0);
+  const totalPotValue = game.players.reduce((s, p) => s + p.buyIns * game.buy_in, 0);
+  const chipsUnbalanced = canSettle && totalChipsOut !== totalPotValue;
+
   return (
+    <>
+    {showQR && <QRModal url={gameUrl} onClose={() => setShowQR(false)} />}
     <main className="max-w-md mx-auto px-4 pt-5 pb-32">
       <div className="flex items-center justify-between mb-4">
         <div>
@@ -340,6 +377,12 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
             {hasCopiedLink
               ? <CheckCircleIcon className="w-5 h-5 text-emerald-400" />
               : <LinkIcon className="w-5 h-5" />}
+          </button>
+          <button
+            onClick={() => setShowQR(true)}
+            className="h-9 px-3 rounded-xl bg-slate-800 text-slate-300 text-sm font-semibold active:bg-slate-700 touch-manipulation flex items-center justify-center"
+          >
+            <QrCodeIcon className="w-5 h-5" />
           </button>
           <button
             onClick={openStats}
@@ -406,6 +449,12 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
 
       {!locked && (
         <div className="fixed bottom-0 left-0 right-0 px-4 pb-8 pt-4 bg-gradient-to-t from-slate-900 via-slate-900/95 to-transparent">
+          {chipsUnbalanced && (
+            <p className="text-center text-xs text-amber-400 mb-2 flex items-center justify-center gap-1">
+              <ExclamationTriangleIcon className="w-3.5 h-3.5 shrink-0" />
+              Total 🍭 in ({totalPotValue.toLocaleString()}) ≠ out ({totalChipsOut.toLocaleString()}) — check counts
+            </p>
+          )}
           <div className="flex gap-3 max-w-md mx-auto">
             <button
               onClick={handleDiscard}
@@ -429,5 +478,6 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
         </div>
       )}
     </main>
+    </>
   );
 }
