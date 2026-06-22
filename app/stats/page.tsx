@@ -94,6 +94,12 @@ export default function StatsPage() {
       });
   }, []);
 
+  async function deleteGame(code: string) {
+    if (!window.confirm("Delete this session? This can't be undone.")) return;
+    await supabase.from("games").delete().eq("code", code);
+    setGames((prev) => prev.filter((g) => g.code !== code));
+  }
+
   const playerStats = computePlayerStats(games);
 
   return (
@@ -143,9 +149,18 @@ export default function StatsPage() {
             <div className="space-y-3">
               {games.map((game) => (
                 <div key={game.code} className="rounded-2xl bg-slate-800 p-4">
-                  <div className="flex justify-between items-baseline mb-3">
+                  <div className="flex justify-between items-center mb-3">
                     <span className="text-xs text-slate-400 font-medium">{formatDate(game.created_at)}</span>
-                    <span className="text-xs text-slate-500">{game.buy_in} 🍭 buy-in</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-slate-500">{game.buy_in} 🍭 buy-in</span>
+                      <button
+                        onClick={() => deleteGame(game.code)}
+                        className="text-slate-600 hover:text-red-400 active:text-red-300 text-base leading-none touch-manipulation"
+                        style={{ minWidth: 32, minHeight: 32, display: "flex", alignItems: "center", justifyContent: "center" }}
+                      >
+                        🗑
+                      </button>
+                    </div>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {sessionPlayers(game).map((p) => (
