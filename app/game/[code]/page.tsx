@@ -6,6 +6,14 @@ import { supabase } from "@/lib/supabase";
 import { type GameRow } from "@/lib/game";
 import { PLAYER_NAMES, type Player } from "@/lib/types";
 import { calculateSettlements } from "@/lib/settle";
+import {
+  PlayCircleIcon,
+  CheckCircleIcon,
+  LinkIcon,
+  ChartBarIcon,
+  ExclamationTriangleIcon,
+  FaceSmileIcon,
+} from "@heroicons/react/24/outline";
 
 
 function generateId() {
@@ -117,15 +125,16 @@ function SettlementPanel({
   return (
     <div className="space-y-4 pt-2 pb-8">
       {!balanced && (
-        <p className="text-xs text-amber-400 bg-amber-900/30 rounded-xl px-3 py-2">
-          ⚠️ Chips in ({totalIn.toLocaleString()} 🍭) ≠ chips out ({totalOut.toLocaleString()} 🍭) — double-check counts.
+        <p className="text-xs text-amber-400 bg-amber-900/30 rounded-xl px-3 py-2 flex items-center gap-1.5">
+          <ExclamationTriangleIcon className="w-4 h-4 shrink-0" />
+          Chips in ({totalIn.toLocaleString()} 🍭) ≠ chips out ({totalOut.toLocaleString()} 🍭) — double-check counts.
         </p>
       )}
 
       <div className="rounded-2xl bg-slate-800 p-4 space-y-2">
         <p className="text-xs text-slate-500 uppercase tracking-widest font-medium mb-3">Transfers</p>
         {transfers.length === 0 ? (
-          <p className="text-slate-400 text-sm">Everyone is even 🎉</p>
+          <p className="text-slate-400 text-sm flex items-center gap-1.5"><FaceSmileIcon className="w-4 h-4" /> Everyone is even</p>
         ) : (
           transfers.map((t, i) => (
             <div key={i} className="flex items-center gap-2 bg-slate-700/60 rounded-xl px-3 py-2.5">
@@ -314,7 +323,7 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
     <main className="max-w-md mx-auto px-4 pt-5 pb-32">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h1 className="text-lg font-bold text-white">🃏 Poker Night</h1>
+          <h1 className="text-lg font-bold text-white flex items-center gap-1.5"><PlayCircleIcon className="w-5 h-5 text-violet-400" /> Poker Night</h1>
           <p className="text-xs text-slate-500 mt-0.5">
             {game.buy_in} 🍭 · <span className="font-mono">{code}</span>
           </p>
@@ -328,13 +337,15 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
                 : "bg-slate-800 text-slate-300 active:bg-slate-700"
             }`}
           >
-            {hasCopiedLink ? "✅" : "🔗"}
+            {hasCopiedLink
+              ? <CheckCircleIcon className="w-5 h-5 text-emerald-400" />
+              : <LinkIcon className="w-5 h-5" />}
           </button>
           <button
             onClick={openStats}
-            className="h-9 px-3 rounded-xl bg-slate-800 text-slate-300 text-sm font-semibold active:bg-slate-700 touch-manipulation"
+            className="h-9 px-3 rounded-xl bg-slate-800 text-slate-300 text-sm font-semibold active:bg-slate-700 touch-manipulation flex items-center justify-center"
           >
-            📊
+            <ChartBarIcon className="w-5 h-5" />
           </button>
         </div>
       </div>
@@ -407,7 +418,7 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
               onClick={handleSettle}
               className="flex-1 py-4 rounded-2xl bg-emerald-600 text-white text-xl font-bold disabled:opacity-30 disabled:cursor-not-allowed active:bg-emerald-700"
             >
-              GG 🃏
+              GG
             </button>
           </div>
           {!canSettle && game.players.length > 0 && (

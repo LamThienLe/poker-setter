@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { type GameRow } from "@/lib/game";
 import { type Player } from "@/lib/types";
+import { ChartBarIcon, TrashIcon } from "@heroicons/react/24/outline";
 
 
 interface PlayerStats {
@@ -116,7 +117,7 @@ export default function StatsPage() {
           ←
         </button>
         <div>
-          <h1 className="text-xl font-bold text-white">📊 Stats</h1>
+          <h1 className="text-xl font-bold text-white flex items-center gap-2"><ChartBarIcon className="w-6 h-6 text-violet-400" /> Stats</h1>
           {returnTo && (
             <p className="text-xs text-slate-500 mt-0.5">Your game is still live. Tap back to return.</p>
           )}
@@ -164,10 +165,10 @@ export default function StatsPage() {
                       <span className="text-xs text-slate-500">{game.buy_in} 🍭 buy-in</span>
                       <button
                         onClick={() => deleteGame(game.code)}
-                        className="text-slate-600 hover:text-red-400 active:text-red-300 text-base leading-none touch-manipulation"
-                        style={{ minWidth: 32, minHeight: 32, display: "flex", alignItems: "center", justifyContent: "center" }}
+                        className="text-slate-600 hover:text-red-400 active:text-red-300 touch-manipulation flex items-center justify-center"
+                        style={{ minWidth: 32, minHeight: 32 }}
                       >
-                        🗑
+                        <TrashIcon className="w-4 h-4" />
                       </button>
                     </div>
                   </div>

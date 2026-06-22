@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { BUY_IN_OPTIONS } from "@/lib/types";
 import { supabase } from "@/lib/supabase";
 import { generateGameCode } from "@/lib/game";
+import { PlayCircleIcon } from "@heroicons/react/24/outline";
 
 
 function BuyInStage({
@@ -18,8 +19,9 @@ function BuyInStage({
 
   return (
     <main className="min-h-dvh flex flex-col items-center justify-center px-6 gap-10">
-      <h1 className="text-3xl font-bold text-white tracking-tight">
-        🃏 Poker Night
+      <h1 className="text-3xl font-bold text-white tracking-tight flex items-center gap-2">
+        <PlayCircleIcon className="w-8 h-8 text-violet-400" />
+        Poker Night
       </h1>
 
       <div className="w-full max-w-xs space-y-3">
