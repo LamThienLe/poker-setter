@@ -62,6 +62,25 @@ export default function Home() {
 
   async function handleConfirm(amount: number) {
     setCreating(true);
+
+    const today = new Date().toISOString().slice(0, 10);
+    const { data: existing } = await supabase
+      .from("games")
+      .select("code")
+      .eq("settled", false)
+      .gte("created_at", today + "T00:00:00Z")
+      .lte("created_at", today + "T23:59:59Z")
+      .limit(1)
+      .single();
+
+    if (existing) {
+      const resume = window.confirm("You have an unfinished game. Resume it instead?");
+      if (resume) {
+        router.push(`/game/${existing.code}`);
+        return;
+      }
+    }
+
     const code = generateGameCode();
     await supabase.from("games").insert({
       code,

@@ -14,3 +14,9 @@
 
 ## 2026-06-21
 - Added Antoine to player list (alphabetical)
+
+## 2026-06-22
+- Discard button added to game page — deletes game from Supabase, redirects home (with confirm dialog)
+- Active-game guard on home page — prompts to resume if an unsettled game exists today
+- Stats dashboard built at /stats — leaderboard (all-time net, sessions, win rate) + session history
+- Stats link added to settled game view

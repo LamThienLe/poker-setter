@@ -246,6 +246,12 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
     pushPlayers(game.players, true);
   }
 
+  async function handleDiscard() {
+    if (!window.confirm("Discard this game? It won't be saved.")) return;
+    await supabase.from("games").delete().eq("code", code);
+    router.push("/");
+  }
+
   if (pageState === "loading") {
     return (
       <main className="min-h-dvh flex items-center justify-center">
@@ -330,18 +336,34 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
       {pageState === "settled" && (
         <div className="mt-6">
           <SettlementPanel players={game.players} buyInAmount={game.buy_in} />
+          <div className="flex justify-center mt-2">
+            <button
+              onClick={() => router.push("/stats")}
+              className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-sm font-semibold active:bg-slate-700"
+            >
+              📊 Stats
+            </button>
+          </div>
         </div>
       )}
 
       {!locked && (
         <div className="fixed bottom-0 left-0 right-0 px-4 pb-8 pt-4 bg-gradient-to-t from-slate-900 via-slate-900/95 to-transparent">
-          <button
-            disabled={!canSettle}
-            onClick={handleSettle}
-            className="w-full max-w-md mx-auto block py-4 rounded-2xl bg-emerald-600 text-white text-xl font-bold disabled:opacity-30 disabled:cursor-not-allowed active:bg-emerald-700"
-          >
-            GG 🃏
-          </button>
+          <div className="flex gap-3 max-w-md mx-auto">
+            <button
+              onClick={handleDiscard}
+              className="px-5 py-4 rounded-2xl bg-slate-800 text-red-400 text-base font-bold active:bg-red-900 active:text-red-200 shrink-0"
+            >
+              Discard
+            </button>
+            <button
+              disabled={!canSettle}
+              onClick={handleSettle}
+              className="flex-1 py-4 rounded-2xl bg-emerald-600 text-white text-xl font-bold disabled:opacity-30 disabled:cursor-not-allowed active:bg-emerald-700"
+            >
+              GG 🃏
+            </button>
+          </div>
           {!canSettle && game.players.length > 0 && (
             <p className="text-center text-xs text-slate-500 mt-2">
               Fill in chip counts for all players to settle
