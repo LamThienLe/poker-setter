@@ -20,3 +20,8 @@
 - Active-game guard on home page — prompts to resume if an unsettled game exists today
 - Stats dashboard built at /stats — leaderboard (all-time net, sessions, win rate) + session history
 - Stats link added to settled game view
+- Delete session button added to stats history (trash icon, confirm prompt)
+- Fixed: Supabase RLS missing delete policy — added "public delete" policy so deletions persist
+- All changes pushed to `railway` branch on GitHub
+- Mid-game stats access added — Stats button now opens leaderboard/history without needing GG first
+- Stats page can return straight back to the live table when opened from a game

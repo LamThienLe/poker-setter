@@ -79,6 +79,10 @@ function formatDate(isoString: string): string {
 
 export default function StatsPage() {
   const router = useRouter();
+  const [returnTo] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    return new URLSearchParams(window.location.search).get("returnTo");
+  });
   const [games, setGames] = useState<GameRow[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -106,12 +110,17 @@ export default function StatsPage() {
     <main className="max-w-md mx-auto px-4 py-5 pb-12">
       <div className="flex items-center gap-3 mb-6">
         <button
-          onClick={() => router.push("/")}
+          onClick={() => router.push(returnTo ? `/game/${returnTo}` : "/")}
           className="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-800 text-slate-300 text-lg active:bg-slate-700"
         >
           ←
         </button>
-        <h1 className="text-xl font-bold text-white">📊 Stats</h1>
+        <div>
+          <h1 className="text-xl font-bold text-white">📊 Stats</h1>
+          {returnTo && (
+            <p className="text-xs text-slate-500 mt-0.5">Your game is still live. Tap back to return.</p>
+          )}
+        </div>
       </div>
 
       {loading && (

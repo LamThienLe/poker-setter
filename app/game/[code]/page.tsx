@@ -246,6 +246,10 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
     pushPlayers(game.players, true);
   }
 
+  function openStats() {
+    router.push(`/stats?returnTo=${code}`);
+  }
+
   async function handleDiscard() {
     if (!window.confirm("Discard this game? It won't be saved.")) return;
     await supabase.from("games").delete().eq("code", code);
@@ -291,25 +295,33 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
             {game.buy_in} 🍭 buy-in · code: <span className="font-mono text-slate-400">{code}</span>
           </p>
         </div>
-        {availableToAdd.length > 0 && !locked && (
-          <div className="flex items-center gap-2">
-            <select
-              value={addingName}
-              onChange={(e) => setAddingName(e.target.value)}
-              className="bg-slate-800 text-white rounded-lg px-2 py-2 text-sm font-semibold"
-            >
-              {availableToAdd.map((n) => (
-                <option key={n} value={n}>{n}</option>
-              ))}
-            </select>
-            <button
-              onClick={addPlayer}
-              className="w-10 h-10 flex items-center justify-center rounded-xl bg-violet-600 text-white text-xl font-bold active:bg-violet-700 touch-manipulation"
-            >
-              +
-            </button>
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={openStats}
+            className="px-3 h-10 flex items-center justify-center rounded-xl bg-slate-800 text-slate-300 text-sm font-semibold active:bg-slate-700 touch-manipulation"
+          >
+            📊 Stats
+          </button>
+          {availableToAdd.length > 0 && !locked && (
+            <>
+              <select
+                value={addingName}
+                onChange={(e) => setAddingName(e.target.value)}
+                className="bg-slate-800 text-white rounded-lg px-2 py-2 text-sm font-semibold"
+              >
+                {availableToAdd.map((n) => (
+                  <option key={n} value={n}>{n}</option>
+                ))}
+              </select>
+              <button
+                onClick={addPlayer}
+                className="w-10 h-10 flex items-center justify-center rounded-xl bg-violet-600 text-white text-xl font-bold active:bg-violet-700 touch-manipulation"
+              >
+                +
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       {game.players.length === 0 && (
@@ -336,14 +348,6 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
       {pageState === "settled" && (
         <div className="mt-6">
           <SettlementPanel players={game.players} buyInAmount={game.buy_in} />
-          <div className="flex justify-center mt-2">
-            <button
-              onClick={() => router.push("/stats")}
-              className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-sm font-semibold active:bg-slate-700"
-            >
-              📊 Stats
-            </button>
-          </div>
         </div>
       )}
 

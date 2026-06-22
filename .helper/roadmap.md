@@ -17,14 +17,17 @@
 - Numeric keyboard for inputs
 - Final review before submit
 
-## Phase 4 — Stats Dashboard (later)
-- Net profit/loss per player (all-time + per session)
-- Sessions played & win rate (finished positive)
-- Biggest single-session win/loss
-- Average buy-ins per session
-- Head-to-head: who tends to win when X plays
+## Phase 4 — Stats Dashboard ✅
+- /stats page: leaderboard with all-time net, sessions, win rate
+- Session history list with color-coded player results
+- Delete session button (trash icon) with Supabase RLS delete policy
+- Stats link from settled game view
 
 ## Phase 5 — Deploy
-- [ ] Push `railway` branch to GitHub
-- [ ] Connect repo to Railway
-- [ ] Set up Railway deployment
+- [x] Push `railway` branch to GitHub
+- [ ] Confirm Railway connected and auto-deploying
+
+## Nice-to-haves (future)
+- Player profile page — tap name in stats to see full session history
+- Share game link — copy button on game page
+- Total pot display on game page (e.g. "Total pot: 3,500 🍭")
