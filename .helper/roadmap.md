@@ -23,11 +23,11 @@
 - Delete session button (trash icon) with Supabase RLS delete policy
 - Stats link from settled game view
 
-## Phase 5 — Deploy
+## Phase 5 — Deploy ✅
 - [x] Push `railway` branch to GitHub
-- [ ] Confirm Railway connected and auto-deploying
+- [x] Confirm Railway connected and auto-deploying
 
 ## Nice-to-haves (future)
 - Player profile page — tap name in stats to see full session history
-- Share game link — copy button on game page
-- Total pot display on game page (e.g. "Total pot: 3,500 🍭")
+- [x] Share game link — copy button on game page
+- [x] Total pot display on game page (e.g. "Total pot: 3,500 🍭")

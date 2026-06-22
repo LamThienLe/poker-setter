@@ -160,7 +160,9 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
   const [pageState, setPageState] = useState<"loading" | "not-found" | "active" | "settled">("loading");
   const [game, setGame] = useState<GameRow | null>(null);
   const [addingName, setAddingName] = useState<string>(PLAYER_NAMES[0]);
+  const [hasCopiedLink, setHasCopiedLink] = useState(false);
   const pendingWrite = useRef(false);
+  const copyResetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const applyGame = useCallback((row: GameRow) => {
     setGame(row);
@@ -197,6 +199,9 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
       .subscribe();
 
     return () => {
+      if (copyResetTimeoutRef.current) {
+        clearTimeout(copyResetTimeoutRef.current);
+      }
       supabase.removeChannel(channel);
     };
   }, [code, applyGame]);
@@ -250,6 +255,23 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
     router.push(`/stats?returnTo=${code}`);
   }
 
+  async function copyGameLink() {
+    const gameUrl = `${window.location.origin}/game/${code}`;
+
+    try {
+      await navigator.clipboard.writeText(gameUrl);
+      setHasCopiedLink(true);
+      if (copyResetTimeoutRef.current) {
+        clearTimeout(copyResetTimeoutRef.current);
+      }
+      copyResetTimeoutRef.current = setTimeout(() => {
+        setHasCopiedLink(false);
+      }, 1800);
+    } catch {
+      window.prompt("Copy this game link:", gameUrl);
+    }
+  }
+
   async function handleDiscard() {
     if (!window.confirm("Discard this game? It won't be saved.")) return;
     await supabase.from("games").delete().eq("code", code);
@@ -283,6 +305,8 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
 
   const usedNames = new Set(game.players.map((p) => p.name));
   const availableToAdd = PLAYER_NAMES.filter((n) => !usedNames.has(n));
+  const totalBuyIns = game.players.reduce((sum, player) => sum + player.buyIns, 0);
+  const totalPot = totalBuyIns * game.buy_in;
   const canSettle = game.players.length >= 2 && game.players.every((p) => p.chips !== "");
   const locked = pageState === "settled";
 
@@ -296,6 +320,16 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={copyGameLink}
+            className={`px-3 h-10 flex items-center justify-center rounded-xl text-sm font-semibold touch-manipulation ${
+              hasCopiedLink
+                ? "bg-emerald-600 text-white"
+                : "bg-slate-800 text-slate-300 active:bg-slate-700"
+            }`}
+          >
+            {hasCopiedLink ? "✅ Copied" : "🔗 Copy"}
+          </button>
           <button
             onClick={openStats}
             className="px-3 h-10 flex items-center justify-center rounded-xl bg-slate-800 text-slate-300 text-sm font-semibold active:bg-slate-700 touch-manipulation"
@@ -321,6 +355,17 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
               </button>
             </>
           )}
+        </div>
+      </div>
+
+      <div className="rounded-2xl bg-slate-800 px-4 py-3 mb-4 flex items-center justify-between gap-3">
+        <div>
+          <p className="text-xs text-slate-500 uppercase tracking-widest font-medium">Total pot</p>
+          <p className="text-white text-xl font-bold tabular-nums">{totalPot.toLocaleString()} 🍭</p>
+        </div>
+        <div className="text-right">
+          <p className="text-xs text-slate-500 uppercase tracking-widest font-medium">Buy-ins</p>
+          <p className="text-slate-300 text-sm font-semibold tabular-nums">{totalBuyIns.toLocaleString()}</p>
         </div>
       </div>
 

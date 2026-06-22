@@ -25,3 +25,9 @@
 - All changes pushed to `railway` branch on GitHub
 - Mid-game stats access added — Stats button now opens leaderboard/history without needing GG first
 - Stats page can return straight back to the live table when opened from a game
+
+## 2026-06-23
+- Share game link button added on the live table — copies the current /game/[code] URL with a quick "Copied" state
+- Total pot card added on the live table — shows total buy-ins × buy-in amount for the current session
+- Checked helper docs and refreshed roadmap/progress to match the real project state
+- Phase 5 marked done per Mr. Lam's deployment confirmation
