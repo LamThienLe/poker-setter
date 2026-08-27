@@ -3,6 +3,7 @@ export const PLAYER_NAMES = [
   "Antoine",
   "Damien",
   "Dani",
+  "Dylan",
   "Elliot",
   "Gaby",
   "Jack",
@@ -14,6 +15,7 @@ export const PLAYER_NAMES = [
   "Remi",
   "Ronan",
   "Tarek",
+  "Vincent",
 ] as const;
 
 export const BUY_IN_OPTIONS = [200, 250, 500] as const;
