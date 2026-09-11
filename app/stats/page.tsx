@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { type GameRow } from "@/lib/game";
 import { type Player } from "@/lib/types";
-import { ChartBarIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { ChartBarIcon } from "@heroicons/react/24/outline";
 import BottomNav from "@/components/BottomNav";
 
 
@@ -85,7 +85,6 @@ export default function StatsPage() {
   });
   const [games, setGames] = useState<GameRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [clearing, setClearing] = useState(false);
 
   useEffect(() => {
     supabase
@@ -99,37 +98,14 @@ export default function StatsPage() {
       });
   }, []);
 
-  async function deleteGame(code: string) {
-    if (!window.confirm("Delete this session? This can't be undone.")) return;
-    await supabase.from("games").delete().eq("code", code);
-    setGames((prev) => prev.filter((g) => g.code !== code));
-  }
-
-  async function clearAllHistory() {
-    if (!window.confirm("Clear ALL session history? This deletes every settled game and can't be undone.")) return;
-    setClearing(true);
-    await supabase.from("games").delete().eq("settled", true);
-    setGames([]);
-    setClearing(false);
-  }
-
   const playerStats = computePlayerStats(games);
 
   return (
     <main className="max-w-md mx-auto px-4 py-5 pb-24">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center mb-6">
         <h1 className="text-xl font-bold text-white flex items-center gap-2">
           <ChartBarIcon className="w-6 h-6 text-blue-400" /> Stats
         </h1>
-        {games.length > 0 && (
-          <button
-            onClick={clearAllHistory}
-            disabled={clearing}
-            className="text-xs text-red-400 active:text-red-300 disabled:opacity-50 px-3 py-2 rounded-lg bg-slate-800 active:bg-red-900/30"
-          >
-            {clearing ? "Clearing…" : "Clear all"}
-          </button>
-        )}
       </div>
 
       {loading && (
@@ -172,16 +148,7 @@ export default function StatsPage() {
                       <span className="text-sm text-white font-semibold">{game.title ?? `Game ${game.code}`}</span>
                       <span className="text-xs text-slate-400 ml-2">{formatDate(game.created_at)}</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-slate-500">{game.buy_in} 🍭</span>
-                      <button
-                        onClick={() => deleteGame(game.code)}
-                        className="text-slate-600 active:text-red-400 touch-manipulation flex items-center justify-center"
-                        style={{ minWidth: 32, minHeight: 32 }}
-                      >
-                        <TrashIcon className="w-4 h-4" />
-                      </button>
-                    </div>
+                    <span className="text-xs text-slate-500">{game.buy_in} 🍭</span>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {sessionPlayers(game).map((p) => (
