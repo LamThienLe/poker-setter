@@ -109,7 +109,7 @@ export default function Home() {
               <button
                 key={game.code}
                 onClick={() => router.push(`/game/${game.code}`)}
-                className="w-full flex items-center justify-between bg-slate-800 rounded-2xl px-4 py-4 active:bg-slate-700"
+                className="w-full flex items-center justify-between bg-slate-800 rounded-lg px-4 py-4 active:bg-slate-700"
               >
                 <div className="text-left">
                   <p className="text-white font-semibold text-sm">{game.title ?? `Game ${game.code}`}</p>
@@ -136,7 +136,7 @@ export default function Home() {
                 <button
                   key={amount}
                   onClick={() => setSelected(amount)}
-                  className={`flex-1 py-4 rounded-2xl text-lg font-bold transition-colors ${
+                  className={`flex-1 py-4 rounded-lg text-lg font-bold transition-colors ${
                     selected === amount
                       ? "bg-red-600 text-white"
                       : "bg-slate-800 text-slate-300 active:bg-slate-700"
@@ -156,7 +156,7 @@ export default function Home() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. The Revenge Game"
-              className="w-full bg-slate-800 text-white rounded-2xl px-4 py-3 text-sm placeholder-slate-600"
+              className="w-full bg-slate-800 text-white rounded-lg px-4 py-3 text-sm placeholder-slate-600"
             />
           </div>
 
@@ -167,14 +167,14 @@ export default function Home() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Leave blank for no password"
-              className="w-full bg-slate-800 text-white rounded-2xl px-4 py-3 text-sm placeholder-slate-600"
+              className="w-full bg-slate-800 text-white rounded-lg px-4 py-3 text-sm placeholder-slate-600"
             />
           </div>
 
           <button
             disabled={creating}
             onClick={handleCreate}
-            className="w-full py-4 rounded-2xl bg-red-600 text-white text-xl font-bold active:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+            className="w-full py-4 rounded-lg bg-red-600 text-white text-xl font-bold active:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
           >
             {creating ? "Creating…" : "Let's play"}
           </button>

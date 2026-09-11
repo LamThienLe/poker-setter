@@ -64,12 +64,12 @@ export default function PlayersPage() {
           onChange={(e) => setNewName(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && addPlayer()}
           placeholder="Add a name…"
-          className="flex-1 bg-slate-800 text-white rounded-2xl px-4 py-3 text-sm placeholder-slate-600"
+          className="flex-1 bg-slate-800 text-white rounded-lg px-4 py-3 text-sm placeholder-slate-600"
         />
         <button
           onClick={addPlayer}
           disabled={adding || !newName.trim()}
-          className="px-4 h-12 rounded-2xl bg-red-600 text-white font-bold active:bg-red-700 disabled:opacity-50 flex items-center justify-center"
+          className="px-4 h-12 rounded-lg bg-red-600 text-white font-bold active:bg-red-700 disabled:opacity-50 flex items-center justify-center"
         >
           <PlusIcon className="w-5 h-5" />
         </button>
@@ -82,7 +82,7 @@ export default function PlayersPage() {
       )}
 
       {!loading && players.length > 0 && (
-        <div className="rounded-2xl bg-slate-800 divide-y divide-slate-700">
+        <div className="rounded-lg bg-slate-800 divide-y divide-slate-700">
           {players.map((player) => (
             <div key={player.id} className="flex items-center justify-between px-4 py-3">
               <span className="text-white font-semibold text-sm">{player.name}</span>

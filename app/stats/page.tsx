@@ -125,7 +125,7 @@ export default function StatsPage() {
           <button
             onClick={clearAllHistory}
             disabled={clearing}
-            className="text-xs text-red-400 active:text-red-300 disabled:opacity-50 px-3 py-2 rounded-xl bg-slate-800 active:bg-red-900/30"
+            className="text-xs text-red-400 active:text-red-300 disabled:opacity-50 px-3 py-2 rounded-lg bg-slate-800 active:bg-red-900/30"
           >
             {clearing ? "Clearing…" : "Clear all"}
           </button>
@@ -144,7 +144,7 @@ export default function StatsPage() {
         <div className="space-y-6">
           <section>
             <p className="text-xs text-slate-500 uppercase tracking-widest font-medium mb-3">Leaderboard</p>
-            <div className="rounded-2xl bg-slate-800 divide-y divide-slate-700">
+            <div className="rounded-lg bg-slate-800 divide-y divide-slate-700">
               {playerStats.map((stats, index) => (
                 <div key={stats.name} className="flex items-center gap-3 px-4 py-3">
                   <span className="text-slate-500 text-sm w-5 shrink-0 tabular-nums">{index + 1}</span>
@@ -166,7 +166,7 @@ export default function StatsPage() {
             <p className="text-xs text-slate-500 uppercase tracking-widest font-medium mb-3">Session history</p>
             <div className="space-y-3">
               {games.map((game) => (
-                <div key={game.code} className="rounded-2xl bg-slate-800 p-4">
+                <div key={game.code} className="rounded-lg bg-slate-800 p-4">
                   <div className="flex justify-between items-center mb-3">
                     <div>
                       <span className="text-sm text-white font-semibold">{game.title ?? `Game ${game.code}`}</span>

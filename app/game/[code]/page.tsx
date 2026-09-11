@@ -132,19 +132,19 @@ function SettlementPanel({
   return (
     <div className="space-y-4 pt-2 pb-8">
       {!balanced && (
-        <p className="text-xs text-amber-400 bg-amber-900/30 rounded-xl px-3 py-2 flex items-center gap-1.5">
+        <p className="text-xs text-amber-400 bg-amber-900/30 rounded-lg px-3 py-2 flex items-center gap-1.5">
           <ExclamationTriangleIcon className="w-4 h-4 shrink-0" />
           Chips in ({totalIn.toLocaleString()} 🍭) ≠ chips out ({totalOut.toLocaleString()} 🍭) — double-check counts.
         </p>
       )}
 
-      <div className="rounded-2xl bg-slate-800 p-4 space-y-2">
+      <div className="rounded-lg bg-slate-800 p-4 space-y-2">
         <p className="text-xs text-slate-500 uppercase tracking-widest font-medium mb-3">Transfers</p>
         {transfers.length === 0 ? (
           <p className="text-slate-400 text-sm flex items-center gap-1.5"><FaceSmileIcon className="w-4 h-4" /> Everyone is even</p>
         ) : (
           transfers.map((t, i) => (
-            <div key={i} className="flex items-center gap-2 bg-slate-700/60 rounded-xl px-3 py-2.5">
+            <div key={i} className="flex items-center gap-2 bg-slate-700/60 rounded-lg px-3 py-2.5">
               <span className="font-semibold text-red-400 text-sm">{t.from}</span>
               <span className="text-slate-500 text-xs">→</span>
               <span className="font-semibold text-emerald-400 text-sm">{t.to}</span>
@@ -154,7 +154,7 @@ function SettlementPanel({
         )}
       </div>
 
-      <div className="rounded-2xl bg-slate-800 p-4 space-y-1">
+      <div className="rounded-lg bg-slate-800 p-4 space-y-1">
         <p className="text-xs text-slate-500 uppercase tracking-widest font-medium mb-3">Net result</p>
         {netResults.map((r) => (
           <div key={r.name} className="flex justify-between text-sm py-1">
@@ -177,7 +177,7 @@ function QRModal({ url, onClose }: { url: string; onClose: () => void }) {
       onClick={onClose}
     >
       <div
-        className="bg-slate-800 rounded-3xl p-6 flex flex-col items-center gap-4 w-full max-w-xs"
+        className="bg-slate-800 rounded-lg p-6 flex flex-col items-center gap-4 w-full max-w-xs"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between w-full">
@@ -186,7 +186,7 @@ function QRModal({ url, onClose }: { url: string; onClose: () => void }) {
             <XMarkIcon className="w-5 h-5" />
           </button>
         </div>
-        <div className="bg-white p-4 rounded-2xl">
+        <div className="bg-white p-4 rounded-lg">
           <QRCodeSVG value={url} size={200} />
         </div>
         <p className="text-slate-400 text-xs font-mono">{url}</p>
@@ -219,13 +219,13 @@ function PasswordGate({ onUnlock }: { onUnlock: (input: string) => void }) {
           onChange={(e) => { setInput(e.target.value); setError(false); }}
           onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
           placeholder="Password"
-          className={`w-full bg-slate-800 text-white rounded-2xl px-4 py-3 text-sm placeholder-slate-600 ${error ? "ring-2 ring-red-500" : ""}`}
+          className={`w-full bg-slate-800 text-white rounded-lg px-4 py-3 text-sm placeholder-slate-600 ${error ? "ring-2 ring-red-500" : ""}`}
           autoFocus
         />
         {error && <p className="text-red-400 text-xs text-center">Wrong password</p>}
         <button
           onClick={handleSubmit}
-          className="w-full py-4 rounded-2xl bg-red-600 text-white font-bold active:bg-red-700"
+          className="w-full py-4 rounded-lg bg-red-600 text-white font-bold active:bg-red-700"
         >
           Join game
         </button>
@@ -397,7 +397,7 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
         <p className="text-slate-400 text-sm text-center">Check the code or start a new game.</p>
         <button
           onClick={() => router.push("/")}
-          className="px-6 py-3 rounded-2xl bg-red-600 text-white font-bold active:bg-red-700"
+          className="px-6 py-3 rounded-lg bg-red-600 text-white font-bold active:bg-red-700"
         >
           New game
         </button>
@@ -437,7 +437,7 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
           <div className="flex gap-2">
             <button
               onClick={copyGameLink}
-              className={`h-9 px-3 rounded-xl text-sm font-semibold touch-manipulation ${
+              className={`h-9 px-3 rounded-lg text-sm font-semibold touch-manipulation ${
                 hasCopiedLink
                   ? "bg-emerald-600 text-white"
                   : "bg-slate-800 text-slate-300 active:bg-slate-700"
@@ -449,20 +449,20 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
             </button>
             <button
               onClick={() => setShowQR(true)}
-              className="h-9 px-3 rounded-xl bg-slate-800 text-slate-300 text-sm font-semibold active:bg-slate-700 touch-manipulation flex items-center justify-center"
+              className="h-9 px-3 rounded-lg bg-slate-800 text-slate-300 text-sm font-semibold active:bg-slate-700 touch-manipulation flex items-center justify-center"
             >
               <QrCodeIcon className="w-5 h-5" />
             </button>
             <button
               onClick={() => router.push(`/stats?returnTo=${code}`)}
-              className="h-9 px-3 rounded-xl bg-slate-800 text-slate-300 text-sm font-semibold active:bg-slate-700 touch-manipulation flex items-center justify-center"
+              className="h-9 px-3 rounded-lg bg-slate-800 text-slate-300 text-sm font-semibold active:bg-slate-700 touch-manipulation flex items-center justify-center"
             >
               <ChartBarIcon className="w-5 h-5" />
             </button>
           </div>
         </div>
 
-        <div className="rounded-3xl bg-slate-800 px-4 py-3 mb-4">
+        <div className="rounded-lg bg-slate-800 px-4 py-3 mb-4">
           <div className="flex items-center justify-between">
             <p className="text-white text-2xl font-bold tabular-nums">{totalPot.toLocaleString()} 🍭</p>
             <p className="text-xs text-slate-400 tabular-nums">{totalBuyIns.toLocaleString()} buy-ins</p>
@@ -470,11 +470,11 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
         </div>
 
         {availableToAdd.length > 0 && !locked && (
-          <div className="rounded-2xl bg-slate-800 p-2 flex items-center gap-2 mb-4">
+          <div className="rounded-lg bg-slate-800 p-2 flex items-center gap-2 mb-4">
             <select
               value={addingName}
               onChange={(e) => setAddingName(e.target.value)}
-              className="flex-1 min-w-0 bg-slate-900 text-white rounded-xl px-3 py-3 text-sm font-semibold"
+              className="flex-1 min-w-0 bg-slate-900 text-white rounded-lg px-3 py-3 text-sm font-semibold"
             >
               {availableToAdd.map((name) => (
                 <option key={name} value={name}>{name}</option>
@@ -482,7 +482,7 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
             </select>
             <button
               onClick={addPlayer}
-              className="px-4 h-11 flex items-center justify-center rounded-xl bg-red-600 text-white text-sm font-bold active:bg-red-700 touch-manipulation shrink-0"
+              className="px-4 h-11 flex items-center justify-center rounded-lg bg-red-600 text-white text-sm font-bold active:bg-red-700 touch-manipulation shrink-0"
             >
               Add
             </button>
@@ -496,7 +496,7 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
         )}
 
         {game.players.length > 0 && (
-          <div className="rounded-2xl bg-slate-900 px-3">
+          <div className="rounded-lg bg-slate-900 px-3">
             {game.players.map((player) => (
               <PlayerRow
                 key={player.id}
@@ -528,14 +528,14 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
             <div className="flex gap-3 max-w-md mx-auto">
               <button
                 onClick={handleDiscard}
-                className="px-5 py-4 rounded-2xl bg-slate-800 text-red-400 text-base font-bold active:bg-red-900 active:text-red-200 shrink-0"
+                className="px-5 py-4 rounded-lg bg-slate-800 text-red-400 text-base font-bold active:bg-red-900 active:text-red-200 shrink-0"
               >
                 Discard
               </button>
               <button
                 disabled={!canSettle}
                 onClick={handleSettle}
-                className="flex-1 py-4 rounded-2xl bg-emerald-600 text-white text-xl font-bold disabled:opacity-30 disabled:cursor-not-allowed active:bg-emerald-700"
+                className="flex-1 py-4 rounded-lg bg-emerald-600 text-white text-xl font-bold disabled:opacity-30 disabled:cursor-not-allowed active:bg-emerald-700"
               >
                 GG
               </button>
