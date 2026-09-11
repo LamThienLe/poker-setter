@@ -18,11 +18,60 @@ import {
   QrCodeIcon,
   XMarkIcon,
   LockClosedIcon,
+  ShareIcon,
 } from "@heroicons/react/24/outline";
 
 
 function generateId() {
   return Math.random().toString(36).slice(2, 9);
+}
+
+
+function vibrate(pattern: number | number[]) {
+  if (typeof navigator !== "undefined" && navigator.vibrate) {
+    navigator.vibrate(pattern);
+  }
+}
+
+
+function playSound(url: string) {
+  try {
+    const audio = new Audio(url);
+    audio.volume = 0.6;
+    audio.play().catch(() => {});
+  } catch {}
+}
+
+
+const SOUNDS = {
+  gg: "https://assets.mixkit.co/active_storage/sfx/2003/2003-preview.mp3",
+  shame: "https://assets.mixkit.co/active_storage/sfx/2028/2028-preview.mp3",
+  win: "https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3",
+};
+
+
+async function fireConfetti(_winner: string) {
+  const { default: confetti } = await import("canvas-confetti");
+  confetti({
+    particleCount: 180,
+    spread: 90,
+    origin: { y: 0.4 },
+    colors: ["#10b981", "#3b82f6", "#ef4444", "#f1f5f9"],
+  });
+  setTimeout(() => {
+    confetti({
+      particleCount: 80,
+      angle: 60,
+      spread: 60,
+      origin: { x: 0, y: 0.5 },
+    });
+    confetti({
+      particleCount: 80,
+      angle: 120,
+      spread: 60,
+      origin: { x: 1, y: 0.5 },
+    });
+  }, 400);
 }
 
 
@@ -112,9 +161,11 @@ function PlayerRow({
 function SettlementPanel({
   players,
   buyInAmount,
+  preview,
 }: {
   players: Player[];
   buyInAmount: number;
+  preview?: boolean;
 }) {
   const transfers = calculateSettlements(
     players.map((p) => ({ name: p.name, buyIns: p.buyIns, chips: Number(p.chips) })),
@@ -131,6 +182,13 @@ function SettlementPanel({
 
   return (
     <div className="space-y-4 pt-2 pb-8">
+      {preview && (
+        <div className="bg-amber-900/30 rounded-lg px-4 py-3 text-center">
+          <p className="text-amber-300 text-xs font-semibold uppercase tracking-widest">Preview — not saved yet</p>
+          <p className="text-amber-400/70 text-xs mt-0.5">Unlock to continue playing, or Final GG to save</p>
+        </div>
+      )}
+
       {!balanced && (
         <p className="text-xs text-amber-400 bg-amber-900/30 rounded-lg px-3 py-2 flex items-center gap-1.5">
           <ExclamationTriangleIcon className="w-4 h-4 shrink-0" />
@@ -235,15 +293,34 @@ function PasswordGate({ onUnlock }: { onUnlock: (input: string) => void }) {
 }
 
 
+function buildShareText(game: GameRow): string {
+  const title = game.title ?? `Game ${game.code}`;
+  const netResults = game.players
+    .map((p) => ({ name: p.name, net: Number(p.chips) - p.buyIns * game.buy_in }))
+    .sort((a, b) => b.net - a.net);
+
+  const lines = netResults.map((r) => {
+    const sign = r.net > 0 ? "+" : "";
+    return `${r.name}: ${sign}${r.net.toLocaleString()} chips`;
+  });
+
+  const winner = netResults[0];
+  const winnerLine = winner.net > 0 ? `🏆 ${winner.name} wins!\n\n` : "";
+
+  return `${title}\n${winnerLine}${lines.join("\n")}`;
+}
+
+
 export default function GamePage({ params }: { params: Promise<{ code: string }> }) {
   const { code } = use(params);
   const router = useRouter();
-  const [pageState, setPageState] = useState<"loading" | "password" | "not-found" | "active" | "settled">("loading");
+  const [pageState, setPageState] = useState<"loading" | "password" | "not-found" | "active" | "preview" | "settled">("loading");
   const [game, setGame] = useState<GameRow | null>(null);
   const [knownPlayers, setKnownPlayers] = useState<string[]>([]);
   const [addingName, setAddingName] = useState<string>("");
   const [hasCopiedLink, setHasCopiedLink] = useState(false);
   const [showQR, setShowQR] = useState(false);
+  const [showShareHint, setShowShareHint] = useState(false);
   const pendingWrite = useRef(false);
   const copyResetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const passwordRef = useRef<string | null>(null);
@@ -332,6 +409,7 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
     if (!game || !addingName) return;
     const usedNames = new Set(game.players.map((p) => p.name));
     if (usedNames.has(addingName)) return;
+    vibrate(30);
     const newPlayers = [
       ...game.players,
       { id: generateId(), name: addingName, buyIns: 1, chips: "", submitted: false },
@@ -351,9 +429,50 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
     pushPlayers(game.players.filter((p) => p.id !== id));
   }
 
-  function handleSettle() {
+  function handleGG() {
     if (!game) return;
-    pushPlayers(game.players, true);
+    vibrate([50, 30, 50]);
+    playSound(SOUNDS.gg);
+    setPageState("preview");
+  }
+
+  function handleUnlock() {
+    vibrate([80, 40, 80, 40, 80]);
+    playSound(SOUNDS.shame);
+    setPageState("active");
+  }
+
+  async function handleFinalGG() {
+    if (!game) return;
+    vibrate([100, 50, 200]);
+    playSound(SOUNDS.win);
+
+    const netResults = game.players
+      .map((p) => ({ name: p.name, net: Number(p.chips) - p.buyIns * game.buy_in }))
+      .sort((a, b) => b.net - a.net);
+    const winner = netResults[0];
+    if (winner?.net > 0) {
+      fireConfetti(winner.name);
+    }
+
+    await pushPlayers(game.players, true);
+
+    setShowShareHint(true);
+  }
+
+  async function handleShare() {
+    if (!game) return;
+    const text = buildShareText(game);
+    try {
+      await navigator.share({ title: game.title ?? "Poker Night", text });
+    } catch {
+      try {
+        await navigator.clipboard.writeText(text);
+        alert("Results copied to clipboard!");
+      } catch {
+        alert(text);
+      }
+    }
   }
 
   async function copyGameLink() {
@@ -412,7 +531,7 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
   const totalBuyIns = game.players.reduce((sum, p) => sum + p.buyIns, 0);
   const totalPot = totalBuyIns * game.buy_in;
   const canSettle = game.players.length >= 2 && game.players.every((p) => p.chips !== "");
-  const locked = pageState === "settled";
+  const locked = pageState === "settled" || pageState === "preview";
 
   const gameUrl = typeof window !== "undefined" ? `${window.location.origin}/game/${code}` : "";
   const totalChipsOut = game.players.reduce((s, p) => s + Number(p.chips || 0), 0);
@@ -511,13 +630,28 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
           </div>
         )}
 
-        {pageState === "settled" && (
+        {(pageState === "preview" || pageState === "settled") && (
           <div className="mt-6">
-            <SettlementPanel players={game.players} buyInAmount={game.buy_in} />
+            <SettlementPanel
+              players={game.players}
+              buyInAmount={game.buy_in}
+              preview={pageState === "preview"}
+            />
           </div>
         )}
 
-        {!locked && (
+        {pageState === "settled" && showShareHint && (
+          <div className="fixed bottom-16 left-0 right-0 px-4 pb-4 pt-4 bg-gradient-to-t from-slate-900 via-slate-900/95 to-transparent">
+            <button
+              onClick={handleShare}
+              className="w-full py-4 rounded-lg bg-blue-600 text-white text-lg font-bold active:bg-blue-700 flex items-center justify-center gap-2 max-w-md mx-auto"
+            >
+              <ShareIcon className="w-5 h-5" /> Share results
+            </button>
+          </div>
+        )}
+
+        {pageState === "active" && !locked && (
           <div className="fixed bottom-16 left-0 right-0 px-4 pb-4 pt-4 bg-gradient-to-t from-slate-900 via-slate-900/95 to-transparent">
             {chipsUnbalanced && (
               <p className="text-center text-xs text-amber-400 mb-2 flex items-center justify-center gap-1">
@@ -534,7 +668,7 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
               </button>
               <button
                 disabled={!canSettle}
-                onClick={handleSettle}
+                onClick={handleGG}
                 className="flex-1 py-4 rounded-lg bg-emerald-600 text-white text-xl font-bold disabled:opacity-30 disabled:cursor-not-allowed active:bg-emerald-700"
               >
                 GG
@@ -545,6 +679,25 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
                 Fill in chip counts for all players to settle
               </p>
             )}
+          </div>
+        )}
+
+        {pageState === "preview" && (
+          <div className="fixed bottom-16 left-0 right-0 px-4 pb-4 pt-4 bg-gradient-to-t from-slate-900 via-slate-900/95 to-transparent">
+            <div className="flex gap-3 max-w-md mx-auto">
+              <button
+                onClick={handleUnlock}
+                className="flex-1 py-4 rounded-lg bg-slate-800 text-amber-400 text-base font-bold active:bg-amber-900/30 active:text-amber-200"
+              >
+                Unlock 🎺
+              </button>
+              <button
+                onClick={handleFinalGG}
+                className="flex-1 py-4 rounded-lg bg-emerald-600 text-white text-base font-bold active:bg-emerald-700"
+              >
+                Final GG 🎉
+              </button>
+            </div>
           </div>
         )}
       </main>
