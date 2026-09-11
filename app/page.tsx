@@ -9,6 +9,42 @@ import { ArrowRightCircleIcon, LockClosedIcon } from "@heroicons/react/24/outlin
 import BottomNav from "@/components/BottomNav";
 
 
+const TAGLINES = [
+  "Fold or Die",
+  "Bluffing Anonymous",
+  "Just One More Hand",
+  "ATM Night",
+  "All In or Shots",
+  "Why Did I Call That",
+];
+
+
+function AnimatedTagline() {
+  const [index, setIndex] = useState(0);
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setVisible(false);
+      setTimeout(() => {
+        setIndex((i) => (i + 1) % TAGLINES.length);
+        setVisible(true);
+      }, 400);
+    }, 2800);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <span
+      className="block text-sm font-medium text-violet-400 mt-1 transition-opacity duration-400"
+      style={{ opacity: visible ? 1 : 0 }}
+    >
+      {TAGLINES[index]}
+    </span>
+  );
+}
+
+
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
@@ -53,9 +89,10 @@ export default function Home() {
 
   return (
     <main className="max-w-md mx-auto px-4 pt-8 pb-28">
-      <div className="flex flex-col items-center mb-8">
+      <div className="flex flex-col items-center mb-8 text-center">
         <span className="text-7xl mb-3">🃏</span>
         <h1 className="text-3xl font-bold text-white tracking-tight">Poker Night</h1>
+        <AnimatedTagline />
       </div>
 
       {!loadingGames && activeGames.length > 0 && (
