@@ -12,7 +12,6 @@ import {
   PlayCircleIcon,
   CheckCircleIcon,
   LinkIcon,
-  ChartBarIcon,
   ExclamationTriangleIcon,
   FaceSmileIcon,
   QrCodeIcon,
@@ -604,12 +603,6 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
               className="h-9 px-3 rounded-lg bg-slate-800 text-slate-300 text-sm font-semibold active:bg-slate-700 touch-manipulation flex items-center justify-center"
             >
               <QrCodeIcon className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() => router.push(`/stats?returnTo=${code}`)}
-              className="h-9 px-3 rounded-lg bg-slate-800 text-slate-300 text-sm font-semibold active:bg-slate-700 touch-manipulation flex items-center justify-center"
-            >
-              <ChartBarIcon className="w-5 h-5" />
             </button>
           </div>
         </div>
