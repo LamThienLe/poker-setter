@@ -356,7 +356,6 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
   const [addingName, setAddingName] = useState<string>("");
   const [hasCopiedLink, setHasCopiedLink] = useState(false);
   const [showQR, setShowQR] = useState(false);
-  const [showShareHint, setShowShareHint] = useState(false);
   const pendingWrite = useRef(false);
   const copyResetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const passwordRef = useRef<string | null>(null);
@@ -492,7 +491,6 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
 
     await pushPlayers(game.players, true);
 
-    setShowShareHint(true);
   }
 
   async function handleShare() {
