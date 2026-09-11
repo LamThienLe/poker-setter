@@ -60,7 +60,7 @@ export default function BottomNav({ active, gameCode }: BottomNavProps) {
             onClick={() => !disabled && router.push(tab.href)}
             className={`flex-1 flex flex-col items-center justify-center py-3 gap-1 transition-colors ${
               isActive
-                ? "text-red-400"
+                ? "text-blue-400"
                 : disabled
                 ? "text-slate-700 cursor-not-allowed"
                 : "text-slate-500 active:text-slate-300"
