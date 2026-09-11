@@ -6,6 +6,8 @@ export interface GameRow {
   players: Player[];
   settled: boolean;
   created_at: string;
+  password: string | null;
+  title: string | null;
 }
 
 export function generateGameCode(): string {

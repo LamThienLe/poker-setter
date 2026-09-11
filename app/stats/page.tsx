@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { type GameRow } from "@/lib/game";
 import { type Player } from "@/lib/types";
 import { ChartBarIcon, TrashIcon } from "@heroicons/react/24/outline";
+import BottomNav from "@/components/BottomNav";
 
 
 interface PlayerStats {
@@ -79,13 +79,13 @@ function formatDate(isoString: string): string {
 
 
 export default function StatsPage() {
-  const router = useRouter();
   const [returnTo] = useState<string | null>(() => {
     if (typeof window === "undefined") return null;
     return new URLSearchParams(window.location.search).get("returnTo");
   });
   const [games, setGames] = useState<GameRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [clearing, setClearing] = useState(false);
 
   useEffect(() => {
     supabase
@@ -105,23 +105,31 @@ export default function StatsPage() {
     setGames((prev) => prev.filter((g) => g.code !== code));
   }
 
+  async function clearAllHistory() {
+    if (!window.confirm("Clear ALL session history? This deletes every settled game and can't be undone.")) return;
+    setClearing(true);
+    await supabase.from("games").delete().eq("settled", true);
+    setGames([]);
+    setClearing(false);
+  }
+
   const playerStats = computePlayerStats(games);
 
   return (
-    <main className="max-w-md mx-auto px-4 py-5 pb-12">
-      <div className="flex items-center gap-3 mb-6">
-        <button
-          onClick={() => router.push(returnTo ? `/game/${returnTo}` : "/")}
-          className="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-800 text-slate-300 text-lg active:bg-slate-700"
-        >
-          ←
-        </button>
-        <div>
-          <h1 className="text-xl font-bold text-white flex items-center gap-2"><ChartBarIcon className="w-6 h-6 text-violet-400" /> Stats</h1>
-          {returnTo && (
-            <p className="text-xs text-slate-500 mt-0.5">Your game is still live. Tap back to return.</p>
-          )}
-        </div>
+    <main className="max-w-md mx-auto px-4 py-5 pb-24">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-xl font-bold text-white flex items-center gap-2">
+          <ChartBarIcon className="w-6 h-6 text-violet-400" /> Stats
+        </h1>
+        {games.length > 0 && (
+          <button
+            onClick={clearAllHistory}
+            disabled={clearing}
+            className="text-xs text-red-400 active:text-red-300 disabled:opacity-50 px-3 py-2 rounded-xl bg-slate-800 active:bg-red-900/30"
+          >
+            {clearing ? "Clearing…" : "Clear all"}
+          </button>
+        )}
       </div>
 
       {loading && (
@@ -160,12 +168,15 @@ export default function StatsPage() {
               {games.map((game) => (
                 <div key={game.code} className="rounded-2xl bg-slate-800 p-4">
                   <div className="flex justify-between items-center mb-3">
-                    <span className="text-xs text-slate-400 font-medium">{formatDate(game.created_at)}</span>
+                    <div>
+                      <span className="text-sm text-white font-semibold">{game.title ?? `Game ${game.code}`}</span>
+                      <span className="text-xs text-slate-400 ml-2">{formatDate(game.created_at)}</span>
+                    </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs text-slate-500">{game.buy_in} 🍭 buy-in</span>
+                      <span className="text-xs text-slate-500">{game.buy_in} 🍭</span>
                       <button
                         onClick={() => deleteGame(game.code)}
-                        className="text-slate-600 hover:text-red-400 active:text-red-300 touch-manipulation flex items-center justify-center"
+                        className="text-slate-600 active:text-red-400 touch-manipulation flex items-center justify-center"
                         style={{ minWidth: 32, minHeight: 32 }}
                       >
                         <TrashIcon className="w-4 h-4" />
@@ -194,6 +205,8 @@ export default function StatsPage() {
           </section>
         </div>
       )}
+
+      <BottomNav active="stats" gameCode={returnTo} />
     </main>
   );
 }

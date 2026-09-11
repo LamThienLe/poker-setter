@@ -5,8 +5,9 @@ import { useRouter } from "next/navigation";
 import { QRCodeSVG } from "qrcode.react";
 import { supabase } from "@/lib/supabase";
 import { type GameRow } from "@/lib/game";
-import { PLAYER_NAMES, type Player } from "@/lib/types";
+import { type Player, type KnownPlayer } from "@/lib/types";
 import { calculateSettlements } from "@/lib/settle";
+import BottomNav from "@/components/BottomNav";
 import {
   PlayCircleIcon,
   CheckCircleIcon,
@@ -16,6 +17,7 @@ import {
   FaceSmileIcon,
   QrCodeIcon,
   XMarkIcon,
+  LockClosedIcon,
 } from "@heroicons/react/24/outline";
 
 
@@ -27,17 +29,19 @@ function generateId() {
 function PlayerRow({
   player,
   usedNames,
+  availableNames,
   onUpdate,
   onRemove,
   locked,
 }: {
   player: Player;
   usedNames: Set<string>;
+  availableNames: string[];
   onUpdate: (updates: Partial<Player>) => void;
   onRemove: () => void;
   locked: boolean;
 }) {
-  const availableNames = PLAYER_NAMES.filter(
+  const selectableNames = availableNames.filter(
     (name) => name === player.name || !usedNames.has(name)
   );
 
@@ -49,7 +53,7 @@ function PlayerRow({
         onChange={(e) => onUpdate({ name: e.target.value })}
         className="w-24 shrink-0 bg-slate-800 text-white rounded-lg px-2 py-2 text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
       >
-        {availableNames.map((name) => (
+        {selectableNames.map((name) => (
           <option key={name} value={name}>
             {name}
           </option>
@@ -192,20 +196,73 @@ function QRModal({ url, onClose }: { url: string; onClose: () => void }) {
 }
 
 
+function PasswordGate({ onUnlock }: { onUnlock: (input: string) => void }) {
+  const [input, setInput] = useState("");
+  const [error, setError] = useState(false);
+
+  function handleSubmit() {
+    onUnlock(input);
+    setError(true);
+  }
+
+  return (
+    <main className="min-h-dvh flex flex-col items-center justify-center px-6 gap-6">
+      <LockClosedIcon className="w-12 h-12 text-violet-400" />
+      <div className="text-center">
+        <h2 className="text-xl font-bold text-white">Game is locked</h2>
+        <p className="text-slate-400 text-sm mt-1">Enter the password to join</p>
+      </div>
+      <div className="w-full max-w-xs space-y-3">
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => { setInput(e.target.value); setError(false); }}
+          onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+          placeholder="Password"
+          className={`w-full bg-slate-800 text-white rounded-2xl px-4 py-3 text-sm placeholder-slate-600 ${error ? "ring-2 ring-red-500" : ""}`}
+          autoFocus
+        />
+        {error && <p className="text-red-400 text-xs text-center">Wrong password</p>}
+        <button
+          onClick={handleSubmit}
+          className="w-full py-4 rounded-2xl bg-violet-600 text-white font-bold active:bg-violet-700"
+        >
+          Join game
+        </button>
+      </div>
+    </main>
+  );
+}
+
+
 export default function GamePage({ params }: { params: Promise<{ code: string }> }) {
   const { code } = use(params);
   const router = useRouter();
-  const [pageState, setPageState] = useState<"loading" | "not-found" | "active" | "settled">("loading");
+  const [pageState, setPageState] = useState<"loading" | "password" | "not-found" | "active" | "settled">("loading");
   const [game, setGame] = useState<GameRow | null>(null);
-  const [addingName, setAddingName] = useState<string>(PLAYER_NAMES[0]);
+  const [knownPlayers, setKnownPlayers] = useState<string[]>([]);
+  const [addingName, setAddingName] = useState<string>("");
   const [hasCopiedLink, setHasCopiedLink] = useState(false);
   const [showQR, setShowQR] = useState(false);
   const pendingWrite = useRef(false);
   const copyResetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const passwordRef = useRef<string | null>(null);
 
   const applyGame = useCallback((row: GameRow) => {
     setGame(row);
     setPageState(row.settled ? "settled" : "active");
+  }, []);
+
+  useEffect(() => {
+    supabase
+      .from("known_players")
+      .select("name")
+      .order("name", { ascending: true })
+      .then(({ data }) => {
+        const names = (data as KnownPlayer[] ?? []).map((p) => p.name);
+        setKnownPlayers(names);
+        if (names.length > 0) setAddingName(names[0]);
+      });
   }, []);
 
   useEffect(() => {
@@ -219,7 +276,17 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
           setPageState("not-found");
           return;
         }
-        applyGame(data as GameRow);
+        const row = data as GameRow;
+        passwordRef.current = row.password;
+        if (row.password) {
+          const unlocked = sessionStorage.getItem(`game_unlocked_${code}`);
+          if (!unlocked) {
+            setGame(row);
+            setPageState("password");
+            return;
+          }
+        }
+        applyGame(row);
       });
 
     const channel = supabase
@@ -238,12 +305,17 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
       .subscribe();
 
     return () => {
-      if (copyResetTimeoutRef.current) {
-        clearTimeout(copyResetTimeoutRef.current);
-      }
+      if (copyResetTimeoutRef.current) clearTimeout(copyResetTimeoutRef.current);
       supabase.removeChannel(channel);
     };
   }, [code, applyGame]);
+
+  function handlePasswordUnlock(input: string) {
+    if (input === passwordRef.current) {
+      sessionStorage.setItem(`game_unlocked_${code}`, "1");
+      applyGame(game!);
+    }
+  }
 
   async function pushPlayers(updatedPlayers: Player[], settled = false) {
     if (!game) return;
@@ -257,32 +329,26 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
   }
 
   function addPlayer() {
-    if (!game) return;
+    if (!game || !addingName) return;
     const usedNames = new Set(game.players.map((p) => p.name));
-    const available = PLAYER_NAMES.filter((n) => !usedNames.has(n));
-    const name = available.includes(addingName as typeof PLAYER_NAMES[number]) ? addingName : available[0];
-    if (!name) return;
+    if (usedNames.has(addingName)) return;
     const newPlayers = [
       ...game.players,
-      { id: generateId(), name, buyIns: 1, chips: "", submitted: false },
+      { id: generateId(), name: addingName, buyIns: 1, chips: "", submitted: false },
     ];
     pushPlayers(newPlayers);
-    const remaining = available.filter((n) => n !== name);
+    const remaining = knownPlayers.filter((n) => !usedNames.has(n) && n !== addingName);
     if (remaining.length > 0) setAddingName(remaining[0]);
   }
 
   function updatePlayer(id: string, updates: Partial<Player>) {
     if (!game) return;
-    const newPlayers = game.players.map((p) =>
-      p.id === id ? { ...p, ...updates } : p
-    );
-    pushPlayers(newPlayers);
+    pushPlayers(game.players.map((p) => p.id === id ? { ...p, ...updates } : p));
   }
 
   function removePlayer(id: string) {
     if (!game) return;
-    const newPlayers = game.players.filter((p) => p.id !== id);
-    pushPlayers(newPlayers);
+    pushPlayers(game.players.filter((p) => p.id !== id));
   }
 
   function handleSettle() {
@@ -290,22 +356,13 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
     pushPlayers(game.players, true);
   }
 
-  function openStats() {
-    router.push(`/stats?returnTo=${code}`);
-  }
-
   async function copyGameLink() {
     const gameUrl = `${window.location.origin}/game/${code}`;
-
     try {
       await navigator.clipboard.writeText(gameUrl);
       setHasCopiedLink(true);
-      if (copyResetTimeoutRef.current) {
-        clearTimeout(copyResetTimeoutRef.current);
-      }
-      copyResetTimeoutRef.current = setTimeout(() => {
-        setHasCopiedLink(false);
-      }, 1800);
+      if (copyResetTimeoutRef.current) clearTimeout(copyResetTimeoutRef.current);
+      copyResetTimeoutRef.current = setTimeout(() => setHasCopiedLink(false), 1800);
     } catch {
       window.prompt("Copy this game link:", gameUrl);
     }
@@ -322,6 +379,14 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
       <main className="min-h-dvh flex items-center justify-center">
         <p className="text-slate-400 text-sm">Loading game…</p>
       </main>
+    );
+  }
+
+  if (pageState === "password") {
+    return (
+      <PasswordGate
+        onUnlock={(input: string) => handlePasswordUnlock(input)}
+      />
     );
   }
 
@@ -343,8 +408,8 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
   if (!game) return null;
 
   const usedNames = new Set(game.players.map((p) => p.name));
-  const availableToAdd = PLAYER_NAMES.filter((n) => !usedNames.has(n));
-  const totalBuyIns = game.players.reduce((sum, player) => sum + player.buyIns, 0);
+  const availableToAdd = knownPlayers.filter((n) => !usedNames.has(n));
+  const totalBuyIns = game.players.reduce((sum, p) => sum + p.buyIns, 0);
   const totalPot = totalBuyIns * game.buy_in;
   const canSettle = game.players.length >= 2 && game.players.every((p) => p.chips !== "");
   const locked = pageState === "settled";
@@ -356,128 +421,135 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
 
   return (
     <>
-    {showQR && <QRModal url={gameUrl} onClose={() => setShowQR(false)} />}
-    <main className="max-w-md mx-auto px-4 pt-5 pb-32">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h1 className="text-lg font-bold text-white flex items-center gap-1.5"><PlayCircleIcon className="w-5 h-5 text-violet-400" /> Poker Night</h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            {game.buy_in} 🍭 · <span className="font-mono">{code}</span>
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={copyGameLink}
-            className={`h-9 px-3 rounded-xl text-sm font-semibold touch-manipulation ${
-              hasCopiedLink
-                ? "bg-emerald-600 text-white"
-                : "bg-slate-800 text-slate-300 active:bg-slate-700"
-            }`}
-          >
-            {hasCopiedLink
-              ? <CheckCircleIcon className="w-5 h-5 text-emerald-400" />
-              : <LinkIcon className="w-5 h-5" />}
-          </button>
-          <button
-            onClick={() => setShowQR(true)}
-            className="h-9 px-3 rounded-xl bg-slate-800 text-slate-300 text-sm font-semibold active:bg-slate-700 touch-manipulation flex items-center justify-center"
-          >
-            <QrCodeIcon className="w-5 h-5" />
-          </button>
-          <button
-            onClick={openStats}
-            className="h-9 px-3 rounded-xl bg-slate-800 text-slate-300 text-sm font-semibold active:bg-slate-700 touch-manipulation flex items-center justify-center"
-          >
-            <ChartBarIcon className="w-5 h-5" />
-          </button>
-        </div>
-      </div>
-
-      <div className="rounded-3xl bg-slate-800 px-4 py-3 mb-4">
-        <div className="flex items-center justify-between">
-          <p className="text-white text-2xl font-bold tabular-nums">{totalPot.toLocaleString()} 🍭</p>
-          <p className="text-xs text-slate-400 tabular-nums">{totalBuyIns.toLocaleString()} buy-ins</p>
-        </div>
-      </div>
-
-      {availableToAdd.length > 0 && !locked && (
-        <div className="rounded-2xl bg-slate-800 p-2 flex items-center gap-2 mb-4">
-          <select
-            value={addingName}
-            onChange={(e) => setAddingName(e.target.value)}
-            className="flex-1 min-w-0 bg-slate-900 text-white rounded-xl px-3 py-3 text-sm font-semibold"
-          >
-            {availableToAdd.map((name) => (
-              <option key={name} value={name}>{name}</option>
-            ))}
-          </select>
-          <button
-            onClick={addPlayer}
-            className="px-4 h-11 flex items-center justify-center rounded-xl bg-violet-600 text-white text-sm font-bold active:bg-violet-700 touch-manipulation shrink-0"
-          >
-            Add
-          </button>
-        </div>
-      )}
-
-      {game.players.length === 0 && (
-        <p className="text-center text-slate-500 text-sm py-12">
-          Hit + to add players as they sit down
-        </p>
-      )}
-
-      {game.players.length > 0 && (
-        <div className="rounded-2xl bg-slate-900 px-3">
-          {game.players.map((player) => (
-            <PlayerRow
-              key={player.id}
-              player={player}
-              usedNames={usedNames}
-              onUpdate={(updates) => updatePlayer(player.id, updates)}
-              onRemove={() => removePlayer(player.id)}
-              locked={locked}
-            />
-          ))}
-        </div>
-      )}
-
-      {pageState === "settled" && (
-        <div className="mt-6">
-          <SettlementPanel players={game.players} buyInAmount={game.buy_in} />
-        </div>
-      )}
-
-      {!locked && (
-        <div className="fixed bottom-0 left-0 right-0 px-4 pb-8 pt-4 bg-gradient-to-t from-slate-900 via-slate-900/95 to-transparent">
-          {chipsUnbalanced && (
-            <p className="text-center text-xs text-amber-400 mb-2 flex items-center justify-center gap-1">
-              <ExclamationTriangleIcon className="w-3.5 h-3.5 shrink-0" />
-              Total 🍭 in ({totalPotValue.toLocaleString()}) ≠ out ({totalChipsOut.toLocaleString()}) — check counts
+      {showQR && <QRModal url={gameUrl} onClose={() => setShowQR(false)} />}
+      <main className="max-w-md mx-auto px-4 pt-5 pb-32">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h1 className="text-lg font-bold text-white flex items-center gap-1.5">
+              <PlayCircleIcon className="w-5 h-5 text-violet-400" />
+              {game.title ?? "Poker Night"}
+            </h1>
+            <p className="text-xs text-slate-500 mt-0.5">
+              {game.buy_in} 🍭 · <span className="font-mono">{code}</span>
+              {game.password && <LockClosedIcon className="inline w-3 h-3 ml-1" />}
             </p>
-          )}
-          <div className="flex gap-3 max-w-md mx-auto">
+          </div>
+          <div className="flex gap-2">
             <button
-              onClick={handleDiscard}
-              className="px-5 py-4 rounded-2xl bg-slate-800 text-red-400 text-base font-bold active:bg-red-900 active:text-red-200 shrink-0"
+              onClick={copyGameLink}
+              className={`h-9 px-3 rounded-xl text-sm font-semibold touch-manipulation ${
+                hasCopiedLink
+                  ? "bg-emerald-600 text-white"
+                  : "bg-slate-800 text-slate-300 active:bg-slate-700"
+              }`}
             >
-              Discard
+              {hasCopiedLink
+                ? <CheckCircleIcon className="w-5 h-5 text-emerald-400" />
+                : <LinkIcon className="w-5 h-5" />}
             </button>
             <button
-              disabled={!canSettle}
-              onClick={handleSettle}
-              className="flex-1 py-4 rounded-2xl bg-emerald-600 text-white text-xl font-bold disabled:opacity-30 disabled:cursor-not-allowed active:bg-emerald-700"
+              onClick={() => setShowQR(true)}
+              className="h-9 px-3 rounded-xl bg-slate-800 text-slate-300 text-sm font-semibold active:bg-slate-700 touch-manipulation flex items-center justify-center"
             >
-              GG
+              <QrCodeIcon className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => router.push(`/stats?returnTo=${code}`)}
+              className="h-9 px-3 rounded-xl bg-slate-800 text-slate-300 text-sm font-semibold active:bg-slate-700 touch-manipulation flex items-center justify-center"
+            >
+              <ChartBarIcon className="w-5 h-5" />
             </button>
           </div>
-          {!canSettle && game.players.length > 0 && (
-            <p className="text-center text-xs text-slate-500 mt-2">
-              Fill in chip counts for all players to settle
-            </p>
-          )}
         </div>
-      )}
-    </main>
+
+        <div className="rounded-3xl bg-slate-800 px-4 py-3 mb-4">
+          <div className="flex items-center justify-between">
+            <p className="text-white text-2xl font-bold tabular-nums">{totalPot.toLocaleString()} 🍭</p>
+            <p className="text-xs text-slate-400 tabular-nums">{totalBuyIns.toLocaleString()} buy-ins</p>
+          </div>
+        </div>
+
+        {availableToAdd.length > 0 && !locked && (
+          <div className="rounded-2xl bg-slate-800 p-2 flex items-center gap-2 mb-4">
+            <select
+              value={addingName}
+              onChange={(e) => setAddingName(e.target.value)}
+              className="flex-1 min-w-0 bg-slate-900 text-white rounded-xl px-3 py-3 text-sm font-semibold"
+            >
+              {availableToAdd.map((name) => (
+                <option key={name} value={name}>{name}</option>
+              ))}
+            </select>
+            <button
+              onClick={addPlayer}
+              className="px-4 h-11 flex items-center justify-center rounded-xl bg-violet-600 text-white text-sm font-bold active:bg-violet-700 touch-manipulation shrink-0"
+            >
+              Add
+            </button>
+          </div>
+        )}
+
+        {game.players.length === 0 && (
+          <p className="text-center text-slate-500 text-sm py-12">
+            Hit Add to add players as they sit down
+          </p>
+        )}
+
+        {game.players.length > 0 && (
+          <div className="rounded-2xl bg-slate-900 px-3">
+            {game.players.map((player) => (
+              <PlayerRow
+                key={player.id}
+                player={player}
+                usedNames={usedNames}
+                availableNames={knownPlayers}
+                onUpdate={(updates) => updatePlayer(player.id, updates)}
+                onRemove={() => removePlayer(player.id)}
+                locked={locked}
+              />
+            ))}
+          </div>
+        )}
+
+        {pageState === "settled" && (
+          <div className="mt-6">
+            <SettlementPanel players={game.players} buyInAmount={game.buy_in} />
+          </div>
+        )}
+
+        {!locked && (
+          <div className="fixed bottom-16 left-0 right-0 px-4 pb-4 pt-4 bg-gradient-to-t from-slate-900 via-slate-900/95 to-transparent">
+            {chipsUnbalanced && (
+              <p className="text-center text-xs text-amber-400 mb-2 flex items-center justify-center gap-1">
+                <ExclamationTriangleIcon className="w-3.5 h-3.5 shrink-0" />
+                Total 🍭 in ({totalPotValue.toLocaleString()}) ≠ out ({totalChipsOut.toLocaleString()}) — check counts
+              </p>
+            )}
+            <div className="flex gap-3 max-w-md mx-auto">
+              <button
+                onClick={handleDiscard}
+                className="px-5 py-4 rounded-2xl bg-slate-800 text-red-400 text-base font-bold active:bg-red-900 active:text-red-200 shrink-0"
+              >
+                Discard
+              </button>
+              <button
+                disabled={!canSettle}
+                onClick={handleSettle}
+                className="flex-1 py-4 rounded-2xl bg-emerald-600 text-white text-xl font-bold disabled:opacity-30 disabled:cursor-not-allowed active:bg-emerald-700"
+              >
+                GG
+              </button>
+            </div>
+            {!canSettle && game.players.length > 0 && (
+              <p className="text-center text-xs text-slate-500 mt-2">
+                Fill in chip counts for all players to settle
+              </p>
+            )}
+          </div>
+        )}
+      </main>
+
+      <BottomNav active="game" gameCode={code} />
     </>
   );
 }
