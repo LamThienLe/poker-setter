@@ -29,9 +29,9 @@ function AnimatedTagline() {
       const swap = setTimeout(() => {
         setIndex((i) => (i + 1) % TAGLINES.length);
         setPhase("enter");
-      }, 300);
+      }, 220);
       return () => clearTimeout(swap);
-    }, 2500);
+    }, 1600);
     return () => clearTimeout(hold);
   }, [index]);
 
