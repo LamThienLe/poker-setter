@@ -45,7 +45,7 @@ function playSound(url: string) {
 
 const SOUNDS = {
   gg: "https://assets.mixkit.co/active_storage/sfx/2003/2003-preview.mp3",
-  shame: "https://assets.mixkit.co/active_storage/sfx/2028/2028-preview.mp3",
+  rebuy: "/rebuy.webm",
   win: "https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3",
 };
 
@@ -115,6 +115,7 @@ function PlayerRow({
   availableNames,
   onUpdate,
   onRemove,
+  onRebuy,
   locked,
 }: {
   player: Player;
@@ -122,6 +123,7 @@ function PlayerRow({
   availableNames: string[];
   onUpdate: (updates: Partial<Player>) => void;
   onRemove: () => void;
+  onRebuy: () => void;
   locked: boolean;
 }) {
   const selectableNames = availableNames.filter(
@@ -157,7 +159,7 @@ function PlayerRow({
         </span>
         <button
           disabled={locked}
-          onClick={() => onUpdate({ buyIns: player.buyIns + 1 })}
+          onClick={() => { onUpdate({ buyIns: player.buyIns + 1 }); onRebuy(); }}
           className="flex items-center justify-center rounded-lg bg-slate-800 text-slate-300 text-lg font-bold disabled:opacity-30 active:bg-slate-700 touch-manipulation"
           style={{ minWidth: 44, minHeight: 44, width: 32, height: 32 }}
         >
@@ -472,7 +474,6 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
 
   function handleUnlock() {
     vibrate([80, 40, 80, 40, 80]);
-    playSound(SOUNDS.shame);
     setPageState("active");
   }
 
@@ -658,6 +659,7 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
                 availableNames={knownPlayers}
                 onUpdate={(updates) => updatePlayer(player.id, updates)}
                 onRemove={() => removePlayer(player.id)}
+                onRebuy={() => { vibrate(40); playSound(SOUNDS.rebuy); }}
                 locked={locked}
               />
             ))}
@@ -723,13 +725,13 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
                 onClick={handleUnlock}
                 className="flex-1 py-4 rounded-lg bg-slate-800 text-amber-400 text-base font-bold active:bg-amber-900/30 active:text-amber-200"
               >
-                Unlock 🎺
+                Unlock
               </button>
               <button
                 onClick={handleFinalGG}
                 className="flex-1 py-4 rounded-lg bg-emerald-600 text-white text-base font-bold active:bg-emerald-700"
               >
-                Final GG 🎉
+                Final GG
               </button>
             </div>
           </div>
