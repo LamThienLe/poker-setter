@@ -207,7 +207,7 @@ function PasswordGate({ onUnlock }: { onUnlock: (input: string) => void }) {
 
   return (
     <main className="min-h-dvh flex flex-col items-center justify-center px-6 gap-6">
-      <LockClosedIcon className="w-12 h-12 text-violet-400" />
+      <LockClosedIcon className="w-12 h-12 text-red-400" />
       <div className="text-center">
         <h2 className="text-xl font-bold text-white">Game is locked</h2>
         <p className="text-slate-400 text-sm mt-1">Enter the password to join</p>
@@ -225,7 +225,7 @@ function PasswordGate({ onUnlock }: { onUnlock: (input: string) => void }) {
         {error && <p className="text-red-400 text-xs text-center">Wrong password</p>}
         <button
           onClick={handleSubmit}
-          className="w-full py-4 rounded-2xl bg-violet-600 text-white font-bold active:bg-violet-700"
+          className="w-full py-4 rounded-2xl bg-red-600 text-white font-bold active:bg-red-700"
         >
           Join game
         </button>
@@ -397,7 +397,7 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
         <p className="text-slate-400 text-sm text-center">Check the code or start a new game.</p>
         <button
           onClick={() => router.push("/")}
-          className="px-6 py-3 rounded-2xl bg-violet-600 text-white font-bold active:bg-violet-700"
+          className="px-6 py-3 rounded-2xl bg-red-600 text-white font-bold active:bg-red-700"
         >
           New game
         </button>
@@ -426,7 +426,7 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
         <div className="flex items-center justify-between mb-4">
           <div>
             <h1 className="text-lg font-bold text-white flex items-center gap-1.5">
-              <PlayCircleIcon className="w-5 h-5 text-violet-400" />
+              <PlayCircleIcon className="w-5 h-5 text-red-400" />
               {game.title ?? "Poker Night"}
             </h1>
             <p className="text-xs text-slate-500 mt-0.5">
@@ -482,7 +482,7 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
             </select>
             <button
               onClick={addPlayer}
-              className="px-4 h-11 flex items-center justify-center rounded-xl bg-violet-600 text-white text-sm font-bold active:bg-violet-700 touch-manipulation shrink-0"
+              className="px-4 h-11 flex items-center justify-center rounded-xl bg-red-600 text-white text-sm font-bold active:bg-red-700 touch-manipulation shrink-0"
             >
               Add
             </button>

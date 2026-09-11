@@ -14,7 +14,7 @@
 - Mid-game stats access from game screen
 - Replaced emoji with Heroicons throughout UI
 
-## Phase 3 — Planned
-- [ ] QR code for game link sharing
-- [ ] Chip count validation — warn before GG if total 🍭 ≠ total buy-ins
-- [ ] Settled game view — read-only post-GG screen showing who pays whom in 🍭
+## Phase 3 — Done ✅
+- [x] QR code for game link sharing
+- [x] Chip count validation — warn before GG if total 🍭 ≠ total buy-ins
+- [x] Settled game view — read-only post-GG screen showing who pays whom in 🍭

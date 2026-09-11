@@ -53,7 +53,7 @@ export default function PlayersPage() {
   return (
     <main className="max-w-md mx-auto px-4 pt-8 pb-28">
       <h1 className="text-xl font-bold text-white flex items-center gap-2 mb-6">
-        <UserGroupIcon className="w-6 h-6 text-violet-400" />
+        <UserGroupIcon className="w-6 h-6 text-red-400" />
         Players
       </h1>
 
@@ -69,7 +69,7 @@ export default function PlayersPage() {
         <button
           onClick={addPlayer}
           disabled={adding || !newName.trim()}
-          className="px-4 h-12 rounded-2xl bg-violet-600 text-white font-bold active:bg-violet-700 disabled:opacity-50 flex items-center justify-center"
+          className="px-4 h-12 rounded-2xl bg-red-600 text-white font-bold active:bg-red-700 disabled:opacity-50 flex items-center justify-center"
         >
           <PlusIcon className="w-5 h-5" />
         </button>

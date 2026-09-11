@@ -118,7 +118,7 @@ export default function Home() {
                     {game.password && <LockClosedIcon className="inline w-3 h-3 ml-1 text-slate-500" />}
                   </p>
                 </div>
-                <ArrowRightCircleIcon className="w-5 h-5 text-violet-400 shrink-0" />
+                <ArrowRightCircleIcon className="w-5 h-5 text-red-400 shrink-0" />
               </button>
             ))}
           </div>
@@ -138,7 +138,7 @@ export default function Home() {
                   onClick={() => setSelected(amount)}
                   className={`flex-1 py-4 rounded-2xl text-lg font-bold transition-colors ${
                     selected === amount
-                      ? "bg-violet-600 text-white"
+                      ? "bg-red-600 text-white"
                       : "bg-slate-800 text-slate-300 active:bg-slate-700"
                   }`}
                 >
@@ -174,7 +174,7 @@ export default function Home() {
           <button
             disabled={creating}
             onClick={handleCreate}
-            className="w-full py-4 rounded-2xl bg-violet-600 text-white text-xl font-bold active:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+            className="w-full py-4 rounded-2xl bg-red-600 text-white text-xl font-bold active:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
           >
             {creating ? "Creating…" : "Let's play"}
           </button>

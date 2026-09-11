@@ -119,7 +119,7 @@ export default function StatsPage() {
     <main className="max-w-md mx-auto px-4 py-5 pb-24">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl font-bold text-white flex items-center gap-2">
-          <ChartBarIcon className="w-6 h-6 text-violet-400" /> Stats
+          <ChartBarIcon className="w-6 h-6 text-red-400" /> Stats
         </h1>
         {games.length > 0 && (
           <button
