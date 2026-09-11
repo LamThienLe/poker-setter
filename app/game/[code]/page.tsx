@@ -50,28 +50,62 @@ const SOUNDS = {
 };
 
 
-async function fireConfetti(_winner: string) {
+async function fireConfetti(topCount: number) {
   const { default: confetti } = await import("canvas-confetti");
+
+  // 1st place — gold explosion from center top, big cannon burst
   confetti({
-    particleCount: 180,
-    spread: 90,
-    origin: { y: 0.4 },
-    colors: ["#10b981", "#3b82f6", "#ef4444", "#f1f5f9"],
+    particleCount: 220,
+    spread: 100,
+    startVelocity: 55,
+    origin: { x: 0.5, y: 0.2 },
+    colors: ["#fbbf24", "#f59e0b", "#fde68a", "#f1f5f9", "#10b981"],
+    scalar: 1.2,
+    gravity: 0.9,
   });
+
+  // 2nd place — blue/silver from left, slightly delayed
+  if (topCount >= 2) {
+    setTimeout(() => {
+      confetti({
+        particleCount: 100,
+        angle: 65,
+        spread: 55,
+        startVelocity: 45,
+        origin: { x: 0.1, y: 0.4 },
+        colors: ["#93c5fd", "#3b82f6", "#bfdbfe", "#f1f5f9"],
+        scalar: 1.0,
+      });
+    }, 350);
+  }
+
+  // 3rd place — red/bronze from right, slightly more delayed
+  if (topCount >= 3) {
+    setTimeout(() => {
+      confetti({
+        particleCount: 70,
+        angle: 115,
+        spread: 55,
+        startVelocity: 38,
+        origin: { x: 0.9, y: 0.4 },
+        colors: ["#f87171", "#ef4444", "#fca5a5", "#f1f5f9"],
+        scalar: 0.9,
+      });
+    }, 600);
+  }
+
+  // Winner follow-up burst — keeps the celebration going
   setTimeout(() => {
     confetti({
       particleCount: 80,
-      angle: 60,
-      spread: 60,
-      origin: { x: 0, y: 0.5 },
+      spread: 120,
+      startVelocity: 30,
+      origin: { x: 0.5, y: 0.35 },
+      colors: ["#fbbf24", "#10b981", "#3b82f6", "#ef4444"],
+      gravity: 1.2,
+      scalar: 0.8,
     });
-    confetti({
-      particleCount: 80,
-      angle: 120,
-      spread: 60,
-      origin: { x: 1, y: 0.5 },
-    });
-  }, 400);
+  }, 900);
 }
 
 
@@ -450,9 +484,9 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
     const netResults = game.players
       .map((p) => ({ name: p.name, net: Number(p.chips) - p.buyIns * game.buy_in }))
       .sort((a, b) => b.net - a.net);
-    const winner = netResults[0];
-    if (winner?.net > 0) {
-      fireConfetti(winner.name);
+    const winners = netResults.filter((r) => r.net > 0);
+    if (winners.length > 0) {
+      fireConfetti(Math.min(winners.length, 3));
     }
 
     await pushPlayers(game.players, true);
