@@ -19,6 +19,7 @@ export default function Home() {
   const [activeGames, setActiveGames] = useState<GameRow[]>([]);
   const [loadingGames, setLoadingGames] = useState(true);
   const [selected, setSelected] = useState<number>(200);
+  const [title, setTitle] = useState("");
   const [password, setPassword] = useState("");
   const [creating, setCreating] = useState(false);
 
@@ -38,13 +39,14 @@ export default function Home() {
     setCreating(true);
     const code = generateGameCode();
     const gameDate = new Date().toLocaleDateString(undefined, { month: "short", day: "numeric" });
+    const finalTitle = title.trim() || `Poker Night – ${gameDate}`;
     await supabase.from("games").insert({
       code,
       buy_in: selected,
       players: [],
       settled: false,
       password: password.trim() || null,
-      title: `Poker Night – ${gameDate}`,
+      title: finalTitle,
     });
     router.push(`/game/${code}`);
   }
@@ -102,6 +104,17 @@ export default function Home() {
                 </button>
               ))}
             </div>
+          </div>
+
+          <div>
+            <p className="text-xs text-slate-400 mb-2">Game title <span className="text-slate-600">(optional)</span></p>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g. The Revenge Game"
+              className="w-full bg-slate-800 text-white rounded-2xl px-4 py-3 text-sm placeholder-slate-600"
+            />
           </div>
 
           <div>
