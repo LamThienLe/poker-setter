@@ -676,7 +676,7 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
           </div>
         )}
 
-        {pageState === "settled" && showShareHint && (
+        {pageState === "settled" && (
           <div className="fixed bottom-16 left-0 right-0 px-4 pb-4 pt-4 bg-gradient-to-t from-slate-900 via-slate-900/95 to-transparent">
             <button
               onClick={handleShare}
