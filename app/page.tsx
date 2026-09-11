@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { BUY_IN_OPTIONS } from "@/lib/types";
 import { supabase } from "@/lib/supabase";
 import { generateGameCode, type GameRow } from "@/lib/game";
-import { PlayCircleIcon, ArrowRightCircleIcon, LockClosedIcon } from "@heroicons/react/24/outline";
+import { ArrowRightCircleIcon, LockClosedIcon } from "@heroicons/react/24/outline";
 import BottomNav from "@/components/BottomNav";
 
 
@@ -53,10 +53,10 @@ export default function Home() {
 
   return (
     <main className="max-w-md mx-auto px-4 pt-8 pb-28">
-      <h1 className="text-3xl font-bold text-white tracking-tight flex items-center gap-2 mb-8">
-        <PlayCircleIcon className="w-8 h-8 text-violet-400" />
-        Poker Night
-      </h1>
+      <div className="flex flex-col items-center mb-8">
+        <span className="text-7xl mb-3">🃏</span>
+        <h1 className="text-3xl font-bold text-white tracking-tight">Poker Night</h1>
+      </div>
 
       {!loadingGames && activeGames.length > 0 && (
         <section className="mb-8">
