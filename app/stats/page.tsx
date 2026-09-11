@@ -8,6 +8,9 @@ import { ChartBarIcon } from "@heroicons/react/24/outline";
 import BottomNav from "@/components/BottomNav";
 
 
+type DateFilter = "all" | "30d";
+
+
 interface PlayerStats {
   name: string;
   totalNet: number;
@@ -78,13 +81,17 @@ function formatDate(isoString: string): string {
 }
 
 
+const RANK_LABEL: Record<number, string> = { 0: "🏆", 1: "🥈", 2: "🥉" };
+
+
 export default function StatsPage() {
   const [returnTo] = useState<string | null>(() => {
     if (typeof window === "undefined") return null;
     return new URLSearchParams(window.location.search).get("returnTo");
   });
-  const [games, setGames] = useState<GameRow[]>([]);
+  const [allGames, setAllGames] = useState<GameRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [dateFilter, setDateFilter] = useState<DateFilter>("all");
 
   useEffect(() => {
     supabase
@@ -93,19 +100,38 @@ export default function StatsPage() {
       .eq("settled", true)
       .order("created_at", { ascending: false })
       .then(({ data }) => {
-        setGames((data as GameRow[]) ?? []);
+        setAllGames((data as GameRow[]) ?? []);
         setLoading(false);
       });
   }, []);
+
+  const games = dateFilter === "30d"
+    ? allGames.filter((g) => new Date(g.created_at) >= new Date(Date.now() - 30 * 24 * 60 * 60 * 1000))
+    : allGames;
 
   const playerStats = computePlayerStats(games);
 
   return (
     <main className="max-w-md mx-auto px-4 py-5 pb-24">
-      <div className="flex items-center mb-6">
+      <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl font-bold text-white flex items-center gap-2">
           <ChartBarIcon className="w-6 h-6 text-blue-400" /> Stats
         </h1>
+        <div className="flex rounded-lg overflow-hidden border border-slate-700">
+          {(["all", "30d"] as DateFilter[]).map((f) => (
+            <button
+              key={f}
+              onClick={() => setDateFilter(f)}
+              className={`px-3 py-1.5 text-xs font-semibold transition-colors ${
+                dateFilter === f
+                  ? "bg-blue-600 text-white"
+                  : "bg-slate-800 text-slate-400 active:bg-slate-700"
+              }`}
+            >
+              {f === "all" ? "All time" : "Last 30d"}
+            </button>
+          ))}
+        </div>
       </div>
 
       {loading && (
@@ -113,7 +139,9 @@ export default function StatsPage() {
       )}
 
       {!loading && games.length === 0 && (
-        <p className="text-slate-500 text-sm text-center py-12">No settled games yet.</p>
+        <p className="text-slate-500 text-sm text-center py-12">
+          {dateFilter === "30d" ? "No games in the last 30 days." : "No settled games yet."}
+        </p>
       )}
 
       {!loading && games.length > 0 && (
@@ -122,16 +150,27 @@ export default function StatsPage() {
             <p className="text-xs text-slate-500 uppercase tracking-widest font-medium mb-3">Leaderboard</p>
             <div className="rounded-lg bg-slate-800 divide-y divide-slate-700">
               {playerStats.map((stats, index) => (
-                <div key={stats.name} className="flex items-center gap-3 px-4 py-3">
-                  <span className="text-slate-500 text-sm w-5 shrink-0 tabular-nums">{index + 1}</span>
-                  <span className="flex-1 text-white font-semibold text-sm">{stats.name}</span>
-                  <div className="text-right">
-                    <p className={`font-bold text-sm tabular-nums ${stats.totalNet > 0 ? "text-emerald-400" : stats.totalNet < 0 ? "text-red-400" : "text-slate-400"}`}>
-                      {formatNet(stats.totalNet)} 🍭
-                    </p>
-                    <p className="text-xs text-slate-500">
-                      {stats.sessions} sessions · {winRate(stats)}% win
-                    </p>
+                <div key={stats.name} className="px-4 py-3">
+                  <div className="flex items-center gap-3">
+                    <span className="text-base w-6 shrink-0 text-center">
+                      {RANK_LABEL[index] ?? <span className="text-slate-500 text-sm tabular-nums">{index + 1}</span>}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white font-semibold text-sm">{stats.name}</p>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        {stats.sessions} {stats.sessions === 1 ? "session" : "sessions"} · {winRate(stats)}% win rate
+                      </p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className={`font-bold text-sm tabular-nums ${stats.totalNet > 0 ? "text-emerald-400" : stats.totalNet < 0 ? "text-red-400" : "text-slate-400"}`}>
+                        {formatNet(stats.totalNet)} 🍭
+                      </p>
+                      <p className="text-xs text-slate-600 mt-0.5 tabular-nums">
+                        {stats.biggestWin > 0 && <span className="text-emerald-700">▲{stats.biggestWin.toLocaleString()}</span>}
+                        {stats.biggestWin > 0 && stats.biggestLoss < 0 && <span className="text-slate-700"> · </span>}
+                        {stats.biggestLoss < 0 && <span className="text-red-800">▼{Math.abs(stats.biggestLoss).toLocaleString()}</span>}
+                      </p>
+                    </div>
                   </div>
                 </div>
               ))}
