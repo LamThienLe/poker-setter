@@ -11,3 +11,21 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   min-height: 100dvh;
 }
+
+@keyframes swoop-in {
+  from { transform: translateY(18px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+@keyframes swoop-out {
+  from { transform: translateY(0);    opacity: 1; }
+  to   { transform: translateY(-18px); opacity: 0; }
+}
+
+.tagline-enter {
+  animation: swoop-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.tagline-exit {
+  animation: swoop-out 0.28s ease-in forwards;
+}

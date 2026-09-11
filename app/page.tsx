@@ -10,37 +10,44 @@ import BottomNav from "@/components/BottomNav";
 
 
 const TAGLINES = [
-  "Fold or Die",
-  "Bluffing Anonymous",
-  "Just One More Hand",
-  "ATM Night",
-  "All In or Shots",
-  "Why Did I Call That",
+  { text: "Fold or Die",          suit: "♠", suitColor: "text-white" },
+  { text: "Bluffing Anonymous",   suit: "♥", suitColor: "text-red-400" },
+  { text: "Just One More Hand",   suit: "♦", suitColor: "text-blue-400" },
+  { text: "ATM Night",            suit: "♣", suitColor: "text-green-400" },
+  { text: "All In or Shots",      suit: "♥", suitColor: "text-red-400" },
+  { text: "Why Did I Call That",  suit: "♦", suitColor: "text-blue-400" },
 ];
 
 
 function AnimatedTagline() {
   const [index, setIndex] = useState(0);
-  const [visible, setVisible] = useState(true);
+  const [phase, setPhase] = useState<"enter" | "exit">("enter");
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setVisible(false);
-      setTimeout(() => {
+    const hold = setTimeout(() => {
+      setPhase("exit");
+      const swap = setTimeout(() => {
         setIndex((i) => (i + 1) % TAGLINES.length);
-        setVisible(true);
-      }, 400);
-    }, 2800);
-    return () => clearInterval(interval);
-  }, []);
+        setPhase("enter");
+      }, 300);
+      return () => clearTimeout(swap);
+    }, 2500);
+    return () => clearTimeout(hold);
+  }, [index]);
+
+  const { text, suit, suitColor } = TAGLINES[index];
 
   return (
-    <span
-      className="block text-sm font-medium text-violet-400 mt-1 transition-opacity duration-400"
-      style={{ opacity: visible ? 1 : 0 }}
-    >
-      {TAGLINES[index]}
-    </span>
+    <div className="overflow-hidden h-9 flex items-center justify-center mt-1">
+      <span
+        key={index}
+        className={`flex items-center gap-1.5 text-lg font-bold text-white ${phase === "enter" ? "tagline-enter" : "tagline-exit"}`}
+      >
+        <span className={suitColor}>{suit}</span>
+        {text}
+        <span className={suitColor}>{suit}</span>
+      </span>
+    </div>
   );
 }
 
@@ -90,8 +97,7 @@ export default function Home() {
   return (
     <main className="max-w-md mx-auto px-4 pt-8 pb-28">
       <div className="flex flex-col items-center mb-8 text-center">
-        <span className="text-7xl mb-3">🃏</span>
-        <h1 className="text-3xl font-bold text-white tracking-tight">Poker Night</h1>
+        <span className="text-7xl mb-2">🃏</span>
         <AnimatedTagline />
       </div>
 
