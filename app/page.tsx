@@ -15,6 +15,7 @@ const TAGLINES = [
   { text: "ATM Night",            suit: "♣", suitColor: "text-green-400" },
   { text: "All In or Shots",      suit: "♥", suitColor: "text-red-400" },
   { text: "Why Did I Call That",  suit: "♦", suitColor: "text-blue-400" },
+  { text: "Running It Twice Won't Help", suit: "♣", suitColor: "text-green-400" },
 ];
 
 
