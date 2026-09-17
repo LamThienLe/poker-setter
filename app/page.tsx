@@ -10,7 +10,6 @@ import BottomNav from "@/components/BottomNav";
 
 
 const TAGLINES = [
-  { text: "Fold or Die",          suit: "♠", suitColor: "text-white" },
   { text: "Bluffing Anonymous",   suit: "♥", suitColor: "text-red-400" },
   { text: "Just One More Hand",   suit: "♦", suitColor: "text-blue-400" },
   { text: "ATM Night",            suit: "♣", suitColor: "text-green-400" },
