@@ -48,7 +48,10 @@ export default function BottomNav({ active, gameCode }: BottomNavProps) {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 flex">
+    <nav
+      className="fixed bottom-0 left-0 right-0 flex border-t-2 border-black"
+      style={{ backgroundColor: "#F5F0E8" }}
+    >
       {tabs.map((tab) => {
         const isActive = active === tab.id;
         const isGame = tab.id === "game";
@@ -58,16 +61,16 @@ export default function BottomNav({ active, gameCode }: BottomNavProps) {
           <button
             key={tab.id}
             onClick={() => !disabled && router.push(tab.href)}
-            className={`flex-1 flex flex-col items-center justify-center py-3 gap-1 transition-colors ${
+            className={`flex-1 flex flex-col items-center justify-center py-3 gap-1 transition-colors font-black uppercase text-xs tracking-widest ${
               isActive
-                ? "text-blue-400"
+                ? "text-black"
                 : disabled
-                ? "text-slate-700 cursor-not-allowed"
-                : "text-slate-500 active:text-slate-300"
+                ? "text-black/20 cursor-not-allowed"
+                : "text-black/40 active:text-black"
             }`}
           >
             {isActive ? tab.activeIcon : tab.icon}
-            <span className="text-xs font-medium">{tab.label}</span>
+            <span>{tab.label}</span>
           </button>
         );
       })}

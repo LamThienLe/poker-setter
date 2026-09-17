@@ -5,7 +5,10 @@ import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { type GameRow } from "@/lib/game";
 import { type Player } from "@/lib/types";
-import { ArrowLeftIcon, UserCircleIcon } from "@heroicons/react/24/outline";
+import { ArrowLeftIcon } from "@heroicons/react/24/outline";
+
+
+const BG = "#F5F0E8";
 
 
 interface SessionResult {
@@ -97,75 +100,83 @@ export default function PlayerProfilePage() {
   const streak = computeStreak(sessions);
 
   return (
-    <main className="max-w-md mx-auto px-4 py-5 pb-16">
+    <main className="max-w-md mx-auto px-4 py-5 pb-16 min-h-dvh" style={{ backgroundColor: BG }}>
       <button
         onClick={() => router.back()}
-        className="flex items-center gap-2 text-slate-400 active:text-white mb-6"
+        className="flex items-center gap-2 text-black/40 active:text-black mb-6 font-black uppercase text-xs tracking-widest"
       >
         <ArrowLeftIcon className="w-5 h-5" />
-        <span className="text-sm">Back</span>
+        Back
       </button>
 
-      <div className="flex items-center gap-3 mb-6">
-        <UserCircleIcon className="w-10 h-10 text-blue-400 shrink-0" />
-        <div>
-          <h1 className="text-xl font-bold text-white">{name}</h1>
-          <p className="text-xs text-slate-500">{sessions.length} {sessions.length === 1 ? "session" : "sessions"}</p>
-        </div>
+      <div className="mb-6 border-b-2 border-black pb-4">
+        <h1 className="text-3xl font-black uppercase tracking-tight text-black">{name}</h1>
+        <p className="text-xs font-bold text-black/40 mt-1 uppercase tracking-widest">
+          {sessions.length} {sessions.length === 1 ? "session" : "sessions"}
+        </p>
       </div>
 
-      {loading && <p className="text-slate-400 text-sm text-center py-12">Loading…</p>}
+      {loading && <p className="text-black/40 text-sm text-center py-12">Loading…</p>}
 
       {!loading && sessions.length === 0 && (
-        <p className="text-slate-500 text-sm text-center py-12">{name} hasn&apos;t played any settled games yet.</p>
+        <p className="text-black/40 text-sm text-center py-12">{name} hasn&apos;t played any settled games yet.</p>
       )}
 
       {!loading && sessions.length > 0 && (
         <div className="space-y-5">
           <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-lg bg-slate-800 px-4 py-3">
-              <p className="text-xs text-slate-500 mb-1">All-time net</p>
-              <p className={`text-lg font-bold tabular-nums ${totalNet > 0 ? "text-emerald-400" : totalNet < 0 ? "text-red-400" : "text-slate-400"}`}>
+            <div className="border-2 border-black px-4 py-3" style={{ boxShadow: "3px 3px 0 #000" }}>
+              <p className="text-xs font-black uppercase text-black/40 mb-1">All-time net</p>
+              <p className={`text-lg font-black tabular-nums ${totalNet > 0 ? "text-green-600" : totalNet < 0 ? "text-red-500" : "text-black/40"}`}>
                 {formatNet(totalNet)} 🍭
               </p>
             </div>
-            <div className="rounded-lg bg-slate-800 px-4 py-3">
-              <p className="text-xs text-slate-500 mb-1">Win rate</p>
-              <p className="text-lg font-bold text-white">{winRate}%</p>
-              <p className="text-xs text-slate-600">{wins}W / {sessions.length - wins}L</p>
+            <div className="border-2 border-black px-4 py-3" style={{ boxShadow: "3px 3px 0 #000" }}>
+              <p className="text-xs font-black uppercase text-black/40 mb-1">Win rate</p>
+              <p className="text-lg font-black text-black">{winRate}%</p>
+              <p className="text-xs font-bold text-black/30">{wins}W / {sessions.length - wins}L</p>
             </div>
-            <div className="rounded-lg bg-slate-800 px-4 py-3">
-              <p className="text-xs text-slate-500 mb-1">Best session</p>
-              <p className="text-lg font-bold text-emerald-400 tabular-nums">
+            <div className="border-2 border-black px-4 py-3" style={{ boxShadow: "3px 3px 0 #000" }}>
+              <p className="text-xs font-black uppercase text-black/40 mb-1">Best session</p>
+              <p className="text-lg font-black text-green-600 tabular-nums">
                 {biggestWin > 0 ? `+${biggestWin.toLocaleString()} 🍭` : "—"}
               </p>
             </div>
-            <div className="rounded-lg bg-slate-800 px-4 py-3">
-              <p className="text-xs text-slate-500 mb-1">Worst session</p>
-              <p className="text-lg font-bold text-red-400 tabular-nums">
+            <div className="border-2 border-black px-4 py-3" style={{ boxShadow: "3px 3px 0 #000" }}>
+              <p className="text-xs font-black uppercase text-black/40 mb-1">Worst session</p>
+              <p className="text-lg font-black text-red-500 tabular-nums">
                 {biggestLoss < 0 ? `${biggestLoss.toLocaleString()} 🍭` : "—"}
               </p>
             </div>
           </div>
 
           {streak.type && streak.count >= 2 && (
-            <div className={`rounded-lg px-4 py-3 text-sm font-semibold ${streak.type === "win" ? "bg-emerald-900/40 text-emerald-400" : "bg-red-900/40 text-red-400"}`}>
+            <div
+              className="border-2 border-black px-4 py-3 text-sm font-black uppercase tracking-widest"
+              style={{ backgroundColor: streak.type === "win" ? "#22c55e" : "#ef4444", color: "#fff", boxShadow: "3px 3px 0 #000" }}
+            >
               {streak.count} {streak.type === "win" ? "win" : "loss"} streak 🔥
             </div>
           )}
 
           <section>
-            <p className="text-xs text-slate-500 uppercase tracking-widest font-medium mb-3">Session history</p>
+            <p className="text-xs font-black uppercase tracking-widest mb-3 pb-1 border-b-2 border-black text-black">
+              Session history
+            </p>
             <div className="space-y-2">
               {sessions.map((s) => (
-                <div key={s.code} className="rounded-lg bg-slate-800 px-4 py-3 flex items-center justify-between">
+                <div
+                  key={s.code}
+                  className="border-2 border-black px-4 py-3 flex items-center justify-between"
+                  style={{ backgroundColor: BG, boxShadow: "3px 3px 0 #000" }}
+                >
                   <div>
-                    <p className="text-sm text-white font-medium">{formatDate(s.date)}</p>
-                    <p className="text-xs text-slate-500 mt-0.5">
-                      {s.buyIns}× {s.buyInAmount} 🍭 buy-in · #{s.rank} of {s.totalPlayers}
+                    <p className="text-sm text-black font-black uppercase">{formatDate(s.date)}</p>
+                    <p className="text-xs text-black/40 font-bold mt-0.5">
+                      {s.buyIns}× {s.buyInAmount} 🍭 · #{s.rank} of {s.totalPlayers}
                     </p>
                   </div>
-                  <p className={`font-bold text-sm tabular-nums ${s.net > 0 ? "text-emerald-400" : s.net < 0 ? "text-red-400" : "text-slate-400"}`}>
+                  <p className={`font-black text-sm tabular-nums ${s.net > 0 ? "text-green-600" : s.net < 0 ? "text-red-500" : "text-black/40"}`}>
                     {formatNet(s.net)} 🍭
                   </p>
                 </div>

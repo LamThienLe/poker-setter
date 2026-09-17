@@ -9,7 +9,6 @@ import { type Player, type KnownPlayer } from "@/lib/types";
 import { calculateSettlements } from "@/lib/settle";
 import BottomNav from "@/components/BottomNav";
 import {
-  PlayCircleIcon,
   CheckCircleIcon,
   LinkIcon,
   ExclamationTriangleIcon,
@@ -19,6 +18,9 @@ import {
   LockClosedIcon,
   ShareIcon,
 } from "@heroicons/react/24/outline";
+
+
+const BG = "#F5F0E8";
 
 
 function generateId() {
@@ -52,7 +54,6 @@ const SOUNDS = {
 async function fireConfetti(topCount: number) {
   const { default: confetti } = await import("canvas-confetti");
 
-  // 1st place — gold explosion from center top, big cannon burst
   confetti({
     particleCount: 220,
     spread: 100,
@@ -63,7 +64,6 @@ async function fireConfetti(topCount: number) {
     gravity: 0.9,
   });
 
-  // 2nd place — blue/silver from left, slightly delayed
   if (topCount >= 2) {
     setTimeout(() => {
       confetti({
@@ -78,7 +78,6 @@ async function fireConfetti(topCount: number) {
     }, 350);
   }
 
-  // 3rd place — red/bronze from right, slightly more delayed
   if (topCount >= 3) {
     setTimeout(() => {
       confetti({
@@ -93,7 +92,6 @@ async function fireConfetti(topCount: number) {
     }, 600);
   }
 
-  // Winner follow-up burst — keeps the celebration going
   setTimeout(() => {
     confetti({
       particleCount: 80,
@@ -130,12 +128,13 @@ function PlayerRow({
   );
 
   return (
-    <div className="flex items-center gap-2 py-2 border-b border-slate-800 last:border-b-0">
+    <div className="flex items-center gap-2 py-2 border-b-2 border-black last:border-b-0">
       <select
         value={player.name}
         disabled={locked}
         onChange={(e) => onUpdate({ name: e.target.value })}
-        className="w-24 shrink-0 bg-slate-800 text-white rounded-lg px-2 py-2 text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
+        className="w-24 shrink-0 border border-black text-black px-2 py-2 text-sm font-black uppercase disabled:opacity-60 disabled:cursor-not-allowed"
+        style={{ backgroundColor: BG }}
       >
         {selectableNames.map((name) => (
           <option key={name} value={name}>
@@ -148,19 +147,19 @@ function PlayerRow({
         <button
           disabled={locked || player.buyIns <= 1}
           onClick={() => onUpdate({ buyIns: player.buyIns - 1 })}
-          className="flex items-center justify-center rounded-lg bg-slate-800 text-slate-300 text-lg font-bold disabled:opacity-30 active:bg-slate-700 touch-manipulation"
-          style={{ minWidth: 44, minHeight: 44, width: 32, height: 32 }}
+          className="flex items-center justify-center border border-black text-black text-lg font-black disabled:opacity-30 active:bg-black active:text-white touch-manipulation"
+          style={{ minWidth: 44, minHeight: 44, width: 32, height: 32, backgroundColor: BG }}
         >
           −
         </button>
-        <span className="w-5 text-center text-sm font-bold tabular-nums text-white">
+        <span className="w-5 text-center text-sm font-black tabular-nums text-black">
           {player.buyIns}
         </span>
         <button
           disabled={locked}
           onClick={() => { onUpdate({ buyIns: player.buyIns + 1 }); onRebuy(); }}
-          className="flex items-center justify-center rounded-lg bg-slate-800 text-slate-300 text-lg font-bold disabled:opacity-30 active:bg-slate-700 touch-manipulation"
-          style={{ minWidth: 44, minHeight: 44, width: 32, height: 32 }}
+          className="flex items-center justify-center border border-black text-black text-lg font-black disabled:opacity-30 active:bg-black active:text-white touch-manipulation"
+          style={{ minWidth: 44, minHeight: 44, width: 32, height: 32, backgroundColor: BG }}
         >
           +
         </button>
@@ -174,14 +173,15 @@ function PlayerRow({
         value={player.chips}
         onChange={(e) => onUpdate({ chips: e.target.value })}
         placeholder="chips"
-        className="flex-1 min-w-0 bg-slate-800 text-white rounded-lg px-2 py-2 text-sm font-semibold placeholder-slate-600 disabled:opacity-60 disabled:cursor-not-allowed"
+        className="flex-1 min-w-0 border border-black text-black px-2 py-2 text-sm font-black placeholder:text-black/30 disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus:ring-1 focus:ring-black"
+        style={{ backgroundColor: BG }}
       />
 
       {!locked && (
         <button
           onClick={onRemove}
-          className="flex items-center justify-center rounded-full bg-slate-800 text-slate-500 active:bg-red-900 active:text-red-300 text-base leading-none shrink-0 touch-manipulation"
-          style={{ minWidth: 44, minHeight: 44, width: 28, height: 28 }}
+          className="flex items-center justify-center border border-black text-black/40 active:bg-red-500 active:text-white active:border-red-500 text-base leading-none shrink-0 touch-manipulation font-black"
+          style={{ minWidth: 44, minHeight: 44, width: 28, height: 28, backgroundColor: BG }}
         >
           ×
         </button>
@@ -218,41 +218,45 @@ function SettlementPanel({
   return (
     <div className="space-y-4 pt-2 pb-8">
       {preview && (
-        <div className="bg-amber-900/30 rounded-lg px-4 py-3 text-center">
-          <p className="text-amber-300 text-xs font-semibold uppercase tracking-widest">Preview — not saved yet</p>
-          <p className="text-amber-400/70 text-xs mt-0.5">Unlock to continue playing, or Final GG to save</p>
+        <div className="border-2 border-black px-4 py-3 text-center" style={{ backgroundColor: "#fbbf24" }}>
+          <p className="text-black text-xs font-black uppercase tracking-widest">Preview — not saved yet</p>
+          <p className="text-black/60 text-xs mt-0.5 font-bold">Unlock to continue, or Final GG to save</p>
         </div>
       )}
 
       {!balanced && (
-        <p className="text-xs text-amber-400 bg-amber-900/30 rounded-lg px-3 py-2 flex items-center gap-1.5">
-          <ExclamationTriangleIcon className="w-4 h-4 shrink-0" />
-          Chips in ({totalIn.toLocaleString()} 🍭) ≠ chips out ({totalOut.toLocaleString()} 🍭) — double-check counts.
-        </p>
+        <div className="border-2 border-black px-3 py-2 flex items-center gap-1.5" style={{ backgroundColor: "#fbbf24" }}>
+          <ExclamationTriangleIcon className="w-4 h-4 shrink-0 text-black" />
+          <p className="text-xs text-black font-black">
+            Chips in ({totalIn.toLocaleString()} 🍭) ≠ out ({totalOut.toLocaleString()} 🍭) — double-check.
+          </p>
+        </div>
       )}
 
-      <div className="rounded-lg bg-slate-800 p-4 space-y-2">
-        <p className="text-xs text-slate-500 uppercase tracking-widest font-medium mb-3">Transfers</p>
+      <div className="border-2 border-black p-4 space-y-2" style={{ boxShadow: "4px 4px 0 #000" }}>
+        <p className="text-xs font-black uppercase tracking-widest text-black mb-3">Transfers</p>
         {transfers.length === 0 ? (
-          <p className="text-slate-400 text-sm flex items-center gap-1.5"><FaceSmileIcon className="w-4 h-4" /> Everyone is even</p>
+          <p className="text-black/60 text-sm flex items-center gap-1.5 font-bold">
+            <FaceSmileIcon className="w-4 h-4" /> Everyone is even
+          </p>
         ) : (
           transfers.map((t, i) => (
-            <div key={i} className="flex items-center gap-2 bg-slate-700/60 rounded-lg px-3 py-2.5">
-              <span className="font-semibold text-red-400 text-sm">{t.from}</span>
-              <span className="text-slate-500 text-xs">→</span>
-              <span className="font-semibold text-emerald-400 text-sm">{t.to}</span>
-              <span className="ml-auto font-bold text-white tabular-nums text-sm">{t.amount.toLocaleString()} 🍭</span>
+            <div key={i} className="flex items-center gap-2 border border-black px-3 py-2.5" style={{ backgroundColor: BG }}>
+              <span className="font-black text-red-500 text-sm uppercase">{t.from}</span>
+              <span className="text-black/40 text-xs font-black">→</span>
+              <span className="font-black text-green-600 text-sm uppercase">{t.to}</span>
+              <span className="ml-auto font-black text-black tabular-nums text-sm">{t.amount.toLocaleString()} 🍭</span>
             </div>
           ))
         )}
       </div>
 
-      <div className="rounded-lg bg-slate-800 p-4 space-y-1">
-        <p className="text-xs text-slate-500 uppercase tracking-widest font-medium mb-3">Net result</p>
+      <div className="border-2 border-black p-4 space-y-1" style={{ boxShadow: "4px 4px 0 #000" }}>
+        <p className="text-xs font-black uppercase tracking-widest text-black mb-3">Net result</p>
         {netResults.map((r) => (
-          <div key={r.name} className="flex justify-between text-sm py-1">
-            <span className="text-slate-300">{r.name}</span>
-            <span className={r.net > 0 ? "text-emerald-400 font-semibold" : r.net < 0 ? "text-red-400 font-semibold" : "text-slate-400"}>
+          <div key={r.name} className="flex justify-between text-sm py-1 border-b border-black/10 last:border-0">
+            <span className="text-black font-black uppercase">{r.name}</span>
+            <span className={`font-black tabular-nums ${r.net > 0 ? "text-green-600" : r.net < 0 ? "text-red-500" : "text-black/40"}`}>
               {r.net > 0 ? "+" : ""}{r.net.toLocaleString()} 🍭
             </span>
           </div>
@@ -270,19 +274,20 @@ function QRModal({ url, onClose }: { url: string; onClose: () => void }) {
       onClick={onClose}
     >
       <div
-        className="bg-slate-800 rounded-lg p-6 flex flex-col items-center gap-4 w-full max-w-xs"
+        className="border-4 border-black p-6 flex flex-col items-center gap-4 w-full max-w-xs"
+        style={{ backgroundColor: BG, boxShadow: "8px 8px 0 #000" }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between w-full">
-          <p className="text-white font-bold text-sm">Scan to join</p>
-          <button onClick={onClose} className="text-slate-400 active:text-white">
+          <p className="text-black font-black text-sm uppercase">Scan to join</p>
+          <button onClick={onClose} className="text-black/40 active:text-black">
             <XMarkIcon className="w-5 h-5" />
           </button>
         </div>
-        <div className="bg-white p-4 rounded-lg">
+        <div className="bg-white p-4 border-2 border-black">
           <QRCodeSVG value={url} size={200} />
         </div>
-        <p className="text-slate-400 text-xs font-mono">{url}</p>
+        <p className="text-black/40 text-xs font-mono">{url}</p>
       </div>
     </div>
   );
@@ -299,11 +304,11 @@ function PasswordGate({ onUnlock }: { onUnlock: (input: string) => void }) {
   }
 
   return (
-    <main className="min-h-dvh flex flex-col items-center justify-center px-6 gap-6">
-      <LockClosedIcon className="w-12 h-12 text-blue-400" />
+    <main className="min-h-dvh flex flex-col items-center justify-center px-6 gap-6" style={{ backgroundColor: BG }}>
+      <LockClosedIcon className="w-12 h-12 text-black" />
       <div className="text-center">
-        <h2 className="text-xl font-bold text-white">Game is locked</h2>
-        <p className="text-slate-400 text-sm mt-1">Enter the password to join</p>
+        <h2 className="text-2xl font-black uppercase text-black">Game is locked</h2>
+        <p className="text-black/50 text-sm mt-1 font-bold">Enter the password to join</p>
       </div>
       <div className="w-full max-w-xs space-y-3">
         <input
@@ -312,13 +317,15 @@ function PasswordGate({ onUnlock }: { onUnlock: (input: string) => void }) {
           onChange={(e) => { setInput(e.target.value); setError(false); }}
           onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
           placeholder="Password"
-          className={`w-full bg-slate-800 text-white rounded-lg px-4 py-3 text-sm placeholder-slate-600 ${error ? "ring-2 ring-red-500" : ""}`}
+          className={`w-full border-2 text-black px-4 py-3 text-sm font-bold placeholder:text-black/30 focus:outline-none ${error ? "border-red-500" : "border-black"}`}
+          style={{ backgroundColor: BG }}
           autoFocus
         />
-        {error && <p className="text-red-400 text-xs text-center">Wrong password</p>}
+        {error && <p className="text-red-500 text-xs text-center font-black uppercase">Wrong password</p>}
         <button
           onClick={handleSubmit}
-          className="w-full py-4 rounded-lg bg-green-700 text-white font-bold active:bg-green-800"
+          className="w-full py-4 border-2 border-black text-white text-base font-black uppercase active:translate-x-0.5 active:translate-y-0.5 transition-transform"
+          style={{ backgroundColor: "#22c55e", boxShadow: "4px 4px 0 #000" }}
         >
           Join game
         </button>
@@ -489,7 +496,6 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
     }
 
     await pushPlayers(game.players, true);
-
   }
 
   async function handleShare() {
@@ -527,28 +533,25 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
 
   if (pageState === "loading") {
     return (
-      <main className="min-h-dvh flex items-center justify-center">
-        <p className="text-slate-400 text-sm">Loading game…</p>
+      <main className="min-h-dvh flex items-center justify-center" style={{ backgroundColor: BG }}>
+        <p className="text-black/40 text-sm font-bold">Loading game…</p>
       </main>
     );
   }
 
   if (pageState === "password") {
-    return (
-      <PasswordGate
-        onUnlock={(input: string) => handlePasswordUnlock(input)}
-      />
-    );
+    return <PasswordGate onUnlock={(input: string) => handlePasswordUnlock(input)} />;
   }
 
   if (pageState === "not-found") {
     return (
-      <main className="min-h-dvh flex flex-col items-center justify-center gap-4 px-6">
-        <p className="text-white font-bold text-lg">Game not found</p>
-        <p className="text-slate-400 text-sm text-center">Check the code or start a new game.</p>
+      <main className="min-h-dvh flex flex-col items-center justify-center gap-4 px-6" style={{ backgroundColor: BG }}>
+        <p className="text-black font-black text-2xl uppercase">Game not found</p>
+        <p className="text-black/50 text-sm text-center font-bold">Check the code or start a new game.</p>
         <button
           onClick={() => router.push("/")}
-          className="px-6 py-3 rounded-lg bg-green-700 text-white font-bold active:bg-green-800"
+          className="px-6 py-4 border-2 border-black text-white font-black uppercase active:translate-x-0.5 active:translate-y-0.5 transition-transform"
+          style={{ backgroundColor: "#22c55e", boxShadow: "4px 4px 0 #000" }}
         >
           New game
         </button>
@@ -573,14 +576,15 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
   return (
     <>
       {showQR && <QRModal url={gameUrl} onClose={() => setShowQR(false)} />}
-      <main className="max-w-md mx-auto px-4 pt-5 pb-32">
+      <main className="max-w-md mx-auto px-4 pt-5 pb-32 min-h-dvh" style={{ backgroundColor: BG }}>
+
+        {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-lg font-bold text-white flex items-center gap-1.5">
-              <PlayCircleIcon className="w-5 h-5 text-blue-400" />
+            <h1 className="text-lg font-black uppercase text-black">
               {game.title ?? "Poker Night"}
             </h1>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-black/40 font-bold mt-0.5">
               {game.buy_in} 🍭 · <span className="font-mono">{code}</span>
               {game.password && <LockClosedIcon className="inline w-3 h-3 ml-1" />}
             </p>
@@ -588,38 +592,43 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
           <div className="flex gap-2">
             <button
               onClick={copyGameLink}
-              className={`h-9 px-3 rounded-lg text-sm font-semibold touch-manipulation ${
-                hasCopiedLink
-                  ? "bg-emerald-600 text-white"
-                  : "bg-slate-800 text-slate-300 active:bg-slate-700"
-              }`}
+              className="h-9 px-3 border-2 border-black text-sm font-black touch-manipulation active:translate-x-0.5 active:translate-y-0.5 transition-transform"
+              style={{
+                backgroundColor: hasCopiedLink ? "#22c55e" : BG,
+                color: "#000",
+                boxShadow: "2px 2px 0 #000",
+              }}
             >
               {hasCopiedLink
-                ? <CheckCircleIcon className="w-5 h-5 text-emerald-400" />
+                ? <CheckCircleIcon className="w-5 h-5" />
                 : <LinkIcon className="w-5 h-5" />}
             </button>
             <button
               onClick={() => setShowQR(true)}
-              className="h-9 px-3 rounded-lg bg-slate-800 text-slate-300 text-sm font-semibold active:bg-slate-700 touch-manipulation flex items-center justify-center"
+              className="h-9 px-3 border-2 border-black text-black text-sm font-black active:translate-x-0.5 active:translate-y-0.5 transition-transform touch-manipulation flex items-center justify-center"
+              style={{ backgroundColor: BG, boxShadow: "2px 2px 0 #000" }}
             >
               <QrCodeIcon className="w-5 h-5" />
             </button>
           </div>
         </div>
 
-        <div className="rounded-lg bg-slate-800 px-4 py-3 mb-4">
+        {/* Total pot */}
+        <div className="border-2 border-black px-4 py-3 mb-4" style={{ boxShadow: "4px 4px 0 #000" }}>
           <div className="flex items-center justify-between">
-            <p className="text-white text-2xl font-bold tabular-nums">{totalPot.toLocaleString()} 🍭</p>
-            <p className="text-xs text-slate-400 tabular-nums">{totalBuyIns.toLocaleString()} buy-ins</p>
+            <p className="text-black text-2xl font-black tabular-nums">{totalPot.toLocaleString()} 🍭</p>
+            <p className="text-xs text-black/40 font-black uppercase tabular-nums">{totalBuyIns.toLocaleString()} buy-ins</p>
           </div>
         </div>
 
+        {/* Add player */}
         {availableToAdd.length > 0 && !locked && (
-          <div className="rounded-lg bg-slate-800 p-2 flex items-center gap-2 mb-4">
+          <div className="border-2 border-black p-2 flex items-center gap-2 mb-4" style={{ boxShadow: "3px 3px 0 #000" }}>
             <select
               value={addingName}
               onChange={(e) => setAddingName(e.target.value)}
-              className="flex-1 min-w-0 bg-slate-900 text-white rounded-lg px-3 py-3 text-sm font-semibold"
+              className="flex-1 min-w-0 border border-black text-black px-3 py-3 text-sm font-black uppercase focus:outline-none"
+              style={{ backgroundColor: BG }}
             >
               {availableToAdd.map((name) => (
                 <option key={name} value={name}>{name}</option>
@@ -627,7 +636,8 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
             </select>
             <button
               onClick={addPlayer}
-              className="px-4 h-11 flex items-center justify-center rounded-lg bg-green-700 text-white text-sm font-bold active:bg-green-800 touch-manipulation shrink-0"
+              className="px-4 h-11 flex items-center justify-center border-2 border-black text-white text-sm font-black uppercase active:translate-x-0.5 active:translate-y-0.5 transition-transform touch-manipulation shrink-0"
+              style={{ backgroundColor: "#22c55e", boxShadow: "2px 2px 0 #000" }}
             >
               Add
             </button>
@@ -635,13 +645,13 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
         )}
 
         {game.players.length === 0 && (
-          <p className="text-center text-slate-500 text-sm py-12">
+          <p className="text-center text-black/40 text-sm py-12 font-bold">
             Hit Add to add players as they sit down
           </p>
         )}
 
         {game.players.length > 0 && (
-          <div className="rounded-lg bg-slate-900 px-3">
+          <div className="border-2 border-black px-3" style={{ boxShadow: "4px 4px 0 #000" }}>
             {game.players.map((player) => (
               <PlayerRow
                 key={player.id}
@@ -667,11 +677,13 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
           </div>
         )}
 
+        {/* Bottom action bars */}
         {pageState === "settled" && (
-          <div className="fixed bottom-16 left-0 right-0 px-4 pb-4 pt-4 bg-gradient-to-t from-slate-900 via-slate-900/95 to-transparent">
+          <div className="fixed bottom-16 left-0 right-0 px-4 pb-4 pt-4" style={{ background: `linear-gradient(to top, ${BG} 70%, transparent)` }}>
             <button
               onClick={handleShare}
-              className="w-full py-4 rounded-lg bg-blue-600 text-white text-lg font-bold active:bg-blue-700 flex items-center justify-center gap-2 max-w-md mx-auto"
+              className="w-full py-4 border-2 border-black text-white text-lg font-black uppercase active:translate-x-1 active:translate-y-1 transition-transform flex items-center justify-center gap-2 max-w-md mx-auto"
+              style={{ backgroundColor: "#3b82f6", boxShadow: "5px 5px 0 #000" }}
             >
               <ShareIcon className="w-5 h-5" /> Share results
             </button>
@@ -679,30 +691,32 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
         )}
 
         {pageState === "active" && !locked && (
-          <div className="fixed bottom-16 left-0 right-0 px-4 pb-4 pt-4 bg-gradient-to-t from-slate-900 via-slate-900/95 to-transparent">
+          <div className="fixed bottom-16 left-0 right-0 px-4 pb-4 pt-4" style={{ background: `linear-gradient(to top, ${BG} 70%, transparent)` }}>
             {chipsUnbalanced && (
-              <p className="text-center text-xs text-amber-400 mb-2 flex items-center justify-center gap-1">
+              <p className="text-center text-xs text-black font-black uppercase mb-2 flex items-center justify-center gap-1">
                 <ExclamationTriangleIcon className="w-3.5 h-3.5 shrink-0" />
-                Total 🍭 in ({totalPotValue.toLocaleString()}) ≠ out ({totalChipsOut.toLocaleString()}) — check counts
+                In ({totalPotValue.toLocaleString()}) ≠ out ({totalChipsOut.toLocaleString()})
               </p>
             )}
             <div className="flex gap-3 max-w-md mx-auto">
               <button
                 onClick={handleDiscard}
-                className="px-5 py-4 rounded-lg bg-slate-800 text-red-400 text-base font-bold active:bg-red-900 active:text-red-200 shrink-0"
+                className="px-5 py-4 border-2 border-black text-red-500 text-base font-black uppercase active:bg-red-500 active:text-white active:translate-x-0.5 active:translate-y-0.5 transition-transform shrink-0"
+                style={{ backgroundColor: BG, boxShadow: "3px 3px 0 #000" }}
               >
                 Discard
               </button>
               <button
                 disabled={!canSettle}
                 onClick={handleGG}
-                className="flex-1 py-4 rounded-lg bg-emerald-600 text-white text-xl font-bold disabled:opacity-30 disabled:cursor-not-allowed active:bg-emerald-700"
+                className="flex-1 py-4 border-2 border-black text-white text-xl font-black uppercase disabled:opacity-30 disabled:cursor-not-allowed active:translate-x-1 active:translate-y-1 transition-transform"
+                style={{ backgroundColor: "#22c55e", boxShadow: "5px 5px 0 #000" }}
               >
                 GG
               </button>
             </div>
             {!canSettle && game.players.length > 0 && (
-              <p className="text-center text-xs text-slate-500 mt-2">
+              <p className="text-center text-xs text-black/40 font-bold mt-2 uppercase">
                 Fill in chip counts for all players to settle
               </p>
             )}
@@ -710,17 +724,19 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
         )}
 
         {pageState === "preview" && (
-          <div className="fixed bottom-16 left-0 right-0 px-4 pb-4 pt-4 bg-gradient-to-t from-slate-900 via-slate-900/95 to-transparent">
+          <div className="fixed bottom-16 left-0 right-0 px-4 pb-4 pt-4" style={{ background: `linear-gradient(to top, ${BG} 70%, transparent)` }}>
             <div className="flex gap-3 max-w-md mx-auto">
               <button
                 onClick={handleUnlock}
-                className="flex-1 py-4 rounded-lg bg-slate-800 text-amber-400 text-base font-bold active:bg-amber-900/30 active:text-amber-200"
+                className="flex-1 py-4 border-2 border-black text-black text-base font-black uppercase active:translate-x-0.5 active:translate-y-0.5 transition-transform"
+                style={{ backgroundColor: "#fbbf24", boxShadow: "4px 4px 0 #000" }}
               >
                 Unlock
               </button>
               <button
                 onClick={handleFinalGG}
-                className="flex-1 py-4 rounded-lg bg-emerald-600 text-white text-base font-bold active:bg-emerald-700"
+                className="flex-1 py-4 border-2 border-black text-white text-base font-black uppercase active:translate-x-1 active:translate-y-1 transition-transform"
+                style={{ backgroundColor: "#22c55e", boxShadow: "4px 4px 0 #000" }}
               >
                 Final GG
               </button>

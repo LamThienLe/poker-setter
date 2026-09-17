@@ -5,9 +5,10 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { type GameRow } from "@/lib/game";
 import { type Player } from "@/lib/types";
-import { ChartBarIcon } from "@heroicons/react/24/outline";
 import BottomNav from "@/components/BottomNav";
 
+
+const BG = "#F5F0E8";
 
 type DateFilter = "all" | "30d";
 
@@ -114,21 +115,19 @@ export default function StatsPage() {
   const playerStats = computePlayerStats(games);
 
   return (
-    <main className="max-w-md mx-auto px-4 py-5 pb-24">
+    <main className="max-w-md mx-auto px-4 py-5 pb-24 min-h-dvh" style={{ backgroundColor: BG }}>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-bold text-white flex items-center gap-2">
-          <ChartBarIcon className="w-6 h-6 text-blue-400" /> Stats
-        </h1>
-        <div className="flex rounded-lg overflow-hidden border border-slate-700">
+        <h1 className="text-2xl font-black uppercase tracking-tight text-black">♣ Stats</h1>
+        <div className="flex border-2 border-black overflow-hidden" style={{ boxShadow: "3px 3px 0 #000" }}>
           {(["all", "30d"] as DateFilter[]).map((f) => (
             <button
               key={f}
               onClick={() => setDateFilter(f)}
-              className={`px-3 py-1.5 text-xs font-semibold transition-colors ${
-                dateFilter === f
-                  ? "bg-blue-600 text-white"
-                  : "bg-slate-800 text-slate-400 active:bg-slate-700"
-              }`}
+              className="px-3 py-1.5 text-xs font-black uppercase transition-colors"
+              style={{
+                backgroundColor: dateFilter === f ? "#000" : BG,
+                color: dateFilter === f ? "#fff" : "#000",
+              }}
             >
               {f === "all" ? "All time" : "Last 30d"}
             </button>
@@ -137,11 +136,11 @@ export default function StatsPage() {
       </div>
 
       {loading && (
-        <p className="text-slate-400 text-sm text-center py-12">Loading…</p>
+        <p className="text-black/40 text-sm text-center py-12">Loading…</p>
       )}
 
       {!loading && games.length === 0 && (
-        <p className="text-slate-500 text-sm text-center py-12">
+        <p className="text-black/40 text-sm text-center py-12">
           {dateFilter === "30d" ? "No games in the last 30 days." : "No settled games yet."}
         </p>
       )}
@@ -149,32 +148,35 @@ export default function StatsPage() {
       {!loading && games.length > 0 && (
         <div className="space-y-6">
           <section>
-            <p className="text-xs text-slate-500 uppercase tracking-widest font-medium mb-3">Leaderboard</p>
-            <div className="rounded-lg bg-slate-800 divide-y divide-slate-700">
+            <p className="text-xs font-black uppercase tracking-widest mb-3 pb-1 border-b-2 border-black text-black">
+              Leaderboard
+            </p>
+            <div className="border-2 border-black divide-y-2 divide-black" style={{ boxShadow: "4px 4px 0 #000" }}>
               {playerStats.map((stats, index) => (
                 <div
                   key={stats.name}
-                  className="px-4 py-3 active:bg-slate-700 cursor-pointer"
+                  className="px-4 py-3 cursor-pointer active:bg-black/5"
+                  style={{ backgroundColor: BG }}
                   onClick={() => router.push(`/players/${encodeURIComponent(stats.name)}`)}
                 >
                   <div className="flex items-center gap-3">
                     <span className="text-base w-6 shrink-0 text-center">
-                      {RANK_LABEL[index] ?? <span className="text-slate-500 text-sm tabular-nums">{index + 1}</span>}
+                      {RANK_LABEL[index] ?? <span className="text-black/40 text-sm tabular-nums font-black">{index + 1}</span>}
                     </span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-white font-semibold text-sm">{stats.name}</p>
-                      <p className="text-xs text-slate-500 mt-0.5">
+                      <p className="text-black font-black text-sm uppercase">{stats.name}</p>
+                      <p className="text-xs text-black/40 font-bold mt-0.5">
                         {stats.sessions} {stats.sessions === 1 ? "session" : "sessions"} · {winRate(stats)}% win rate
                       </p>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className={`font-bold text-sm tabular-nums ${stats.totalNet > 0 ? "text-emerald-400" : stats.totalNet < 0 ? "text-red-400" : "text-slate-400"}`}>
+                      <p className={`font-black text-sm tabular-nums ${stats.totalNet > 0 ? "text-green-600" : stats.totalNet < 0 ? "text-red-500" : "text-black/40"}`}>
                         {formatNet(stats.totalNet)} 🍭
                       </p>
-                      <p className="text-xs text-slate-600 mt-0.5 tabular-nums">
-                        {stats.biggestWin > 0 && <span className="text-emerald-700">▲{stats.biggestWin.toLocaleString()}</span>}
-                        {stats.biggestWin > 0 && stats.biggestLoss < 0 && <span className="text-slate-700"> · </span>}
-                        {stats.biggestLoss < 0 && <span className="text-red-800">▼{Math.abs(stats.biggestLoss).toLocaleString()}</span>}
+                      <p className="text-xs text-black/30 mt-0.5 tabular-nums font-bold">
+                        {stats.biggestWin > 0 && <span className="text-green-600">▲{stats.biggestWin.toLocaleString()}</span>}
+                        {stats.biggestWin > 0 && stats.biggestLoss < 0 && <span> · </span>}
+                        {stats.biggestLoss < 0 && <span className="text-red-500">▼{Math.abs(stats.biggestLoss).toLocaleString()}</span>}
                       </p>
                     </div>
                   </div>
@@ -184,28 +186,28 @@ export default function StatsPage() {
           </section>
 
           <section>
-            <p className="text-xs text-slate-500 uppercase tracking-widest font-medium mb-3">Session history</p>
+            <p className="text-xs font-black uppercase tracking-widest mb-3 pb-1 border-b-2 border-black text-black">
+              Session history
+            </p>
             <div className="space-y-3">
               {games.map((game) => (
-                <div key={game.code} className="rounded-lg bg-slate-800 p-4">
+                <div key={game.code} className="border-2 border-black p-4" style={{ backgroundColor: BG, boxShadow: "4px 4px 0 #000" }}>
                   <div className="flex justify-between items-center mb-3">
                     <div>
-                      <span className="text-sm text-white font-semibold">{game.title ?? `Game ${game.code}`}</span>
-                      <span className="text-xs text-slate-400 ml-2">{formatDate(game.created_at)}</span>
+                      <span className="text-sm text-black font-black uppercase">{game.title ?? `Game ${game.code}`}</span>
+                      <span className="text-xs text-black/40 font-bold ml-2">{formatDate(game.created_at)}</span>
                     </div>
-                    <span className="text-xs text-slate-500">{game.buy_in} 🍭</span>
+                    <span className="text-xs text-black/40 font-bold">{game.buy_in} 🍭</span>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {sessionPlayers(game).map((p) => (
                       <span
                         key={p.name}
-                        className={`text-xs font-semibold px-2 py-1 rounded-lg ${
-                          p.net > 0
-                            ? "bg-emerald-900/50 text-emerald-400"
-                            : p.net < 0
-                            ? "bg-red-900/50 text-red-400"
-                            : "bg-slate-700 text-slate-400"
-                        }`}
+                        className="text-xs font-black px-2 py-1 border border-black uppercase"
+                        style={{
+                          backgroundColor: p.net > 0 ? "#22c55e" : p.net < 0 ? "#ef4444" : "#000",
+                          color: "#fff",
+                        }}
                       >
                         {p.name} {formatNet(p.net)}
                       </span>

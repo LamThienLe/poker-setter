@@ -1,5 +1,15 @@
 # Progress
 
+## 2026-09-18 (latest)
+- Neo-brutalist homepage redesign — cream background (#F5F0E8), heavy black borders, hard offset shadows, ALL CAPS bold type
+- Suit color system: ♠ black, ♥ red, ♦ blue, ♣ green — used on buy-in buttons and CTA
+- CTA button color changes dynamically based on selected buy-in
+
+## 2026-09-18
+- Player profile page at /players/[name] — all-time net, win rate, best/worst session, win/loss streak, full session history with rank
+- Stats leaderboard rows are now tappable — tap a player to view their profile
+- Pushed to `railway` branch
+
 ## 2026-06-20
 - Project initialized with Next.js + Tailwind, committed on `railway` branch
 - Core UI: today's page, dynamic player add, buy-in selector (200/250/500 🍭), rebuy +/− counter, chip input
