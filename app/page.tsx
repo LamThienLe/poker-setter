@@ -13,7 +13,6 @@ const TAGLINES = [
   { text: "Bluffing Anonymous",          suit: "♥", color: "#ef4444" },
   { text: "Just One More Hand",          suit: "♦", color: "#3b82f6" },
   { text: "ATM Night",                   suit: "♣", color: "#22c55e" },
-  { text: "All In or Shots",             suit: "♥", color: "#ef4444" },
   { text: "Why Did I Call That",         suit: "♦", color: "#3b82f6" },
   { text: "Running It Twice Won't Help", suit: "♣", color: "#22c55e" },
 ];
@@ -130,23 +129,26 @@ export default function Home() {
             ♦ Active games
           </p>
           <div className="space-y-3">
-            {activeGames.map((game) => (
-              <button
-                key={game.code}
-                onClick={() => router.push(`/game/${game.code}`)}
-                className="w-full flex items-center justify-between border-2 border-black px-4 py-4 active:translate-x-1 active:translate-y-1 transition-transform"
-                style={{ backgroundColor: "#F5F0E8", boxShadow: "4px 4px 0 #000" }}
-              >
-                <div className="text-left">
-                  <p className="text-black font-black text-sm uppercase">{game.title ?? `Game ${game.code}`}</p>
-                  <p className="text-xs font-bold mt-0.5 text-black/50">
-                    {game.buy_in} 🍭 · {formatDate(game.created_at)}
-                    {game.password && <LockClosedIcon className="inline w-3 h-3 ml-1" />}
-                  </p>
-                </div>
-                <ArrowRightCircleIcon className="w-6 h-6 shrink-0 text-black" />
-              </button>
-            ))}
+            {activeGames.map((game) => {
+              const accentColor = game.buy_in === 200 ? "#22c55e" : game.buy_in === 250 ? "#ef4444" : "#3b82f6";
+              return (
+                <button
+                  key={game.code}
+                  onClick={() => router.push(`/game/${game.code}`)}
+                  className="w-full flex items-center justify-between border-2 border-black px-4 py-4 active:translate-x-1 active:translate-y-1 transition-transform"
+                  style={{ backgroundColor: accentColor, boxShadow: "4px 4px 0 #000" }}
+                >
+                  <div className="text-left">
+                    <p className="text-white font-black text-sm uppercase">{game.title ?? `Game ${game.code}`}</p>
+                    <p className="text-xs font-bold mt-0.5 text-white/70">
+                      {game.buy_in} 🍭 · {formatDate(game.created_at)}
+                      {game.password && <LockClosedIcon className="inline w-3 h-3 ml-1" />}
+                    </p>
+                  </div>
+                  <ArrowRightCircleIcon className="w-6 h-6 shrink-0 text-white" />
+                </button>
+              );
+            })}
           </div>
         </section>
       )}
