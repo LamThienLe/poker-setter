@@ -102,7 +102,7 @@ export default function Home() {
   const selectedSuit = SUIT_COLORS[BUY_IN_OPTIONS.indexOf(selected as typeof BUY_IN_OPTIONS[number])];
 
   return (
-    <main className="min-h-dvh bg-white max-w-md mx-auto px-4 pt-8 pb-28">
+    <main className="min-h-dvh max-w-md mx-auto px-4 pt-8 pb-28" style={{ backgroundColor: "#F5F0E8" }}>
 
       {/* Header */}
       <div
@@ -134,7 +134,8 @@ export default function Home() {
               <button
                 key={game.code}
                 onClick={() => router.push(`/game/${game.code}`)}
-                className="w-full flex items-center justify-between border-2 border-black px-4 py-4 active:translate-x-1 active:translate-y-1 transition-transform bg-white"
+                className="w-full flex items-center justify-between border-2 border-black px-4 py-4 active:translate-x-1 active:translate-y-1 transition-transform"
+                style={{ backgroundColor: "#F5F0E8" }}
                 style={{ boxShadow: "4px 4px 0 #000" }}
               >
                 <div className="text-left">
@@ -174,7 +175,7 @@ export default function Home() {
                     style={{
                       borderColor: borderAndShadowColor,
                       color: isSelected ? "#fff" : borderAndShadowColor,
-                      backgroundColor: isSelected ? borderAndShadowColor : "#fff",
+                      backgroundColor: isSelected ? borderAndShadowColor : "#F5F0E8",
                       boxShadow: `4px 4px 0 ${borderAndShadowColor}`,
                     }}
                   >
@@ -196,7 +197,8 @@ export default function Home() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. The Revenge Game"
-              className="w-full bg-white border-2 border-black text-black px-4 py-3 text-sm font-bold placeholder:text-black/30 placeholder:font-normal focus:outline-none focus:ring-2 focus:ring-black"
+              className="w-full border-2 border-black text-black px-4 py-3 text-sm font-bold placeholder:text-black/30 placeholder:font-normal focus:outline-none focus:ring-2 focus:ring-black"
+              style={{ backgroundColor: "#F5F0E8" }}
             />
           </div>
 
@@ -210,7 +212,8 @@ export default function Home() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Leave blank for no password"
-              className="w-full bg-white border-2 border-black text-black px-4 py-3 text-sm font-bold placeholder:text-black/30 placeholder:font-normal focus:outline-none focus:ring-2 focus:ring-black"
+              className="w-full border-2 border-black text-black px-4 py-3 text-sm font-bold placeholder:text-black/30 placeholder:font-normal focus:outline-none focus:ring-2 focus:ring-black"
+              style={{ backgroundColor: "#F5F0E8" }}
             />
           </div>
 
