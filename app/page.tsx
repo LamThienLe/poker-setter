@@ -135,8 +135,7 @@ export default function Home() {
                 key={game.code}
                 onClick={() => router.push(`/game/${game.code}`)}
                 className="w-full flex items-center justify-between border-2 border-black px-4 py-4 active:translate-x-1 active:translate-y-1 transition-transform"
-                style={{ backgroundColor: "#F5F0E8" }}
-                style={{ boxShadow: "4px 4px 0 #000" }}
+                style={{ backgroundColor: "#F5F0E8", boxShadow: "4px 4px 0 #000" }}
               >
                 <div className="text-left">
                   <p className="text-black font-black text-sm uppercase">{game.title ?? `Game ${game.code}`}</p>
