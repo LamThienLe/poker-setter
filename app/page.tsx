@@ -165,17 +165,15 @@ export default function Home() {
               {BUY_IN_OPTIONS.map((amount, i) => {
                 const sc = SUIT_COLORS[i];
                 const isSelected = selected === amount;
-                const borderAndShadowColor = sc.color;
                 return (
                   <button
                     key={amount}
                     onClick={() => setSelected(amount)}
-                    className="flex-1 py-4 border-2 text-xl font-black uppercase active:translate-x-0.5 active:translate-y-0.5 transition-transform"
+                    className="flex-1 py-4 border-2 border-black text-xl font-black uppercase active:translate-x-0.5 active:translate-y-0.5 transition-transform"
                     style={{
-                      borderColor: borderAndShadowColor,
-                      color: isSelected ? "#fff" : borderAndShadowColor,
-                      backgroundColor: isSelected ? borderAndShadowColor : "#F5F0E8",
-                      boxShadow: `4px 4px 0 ${borderAndShadowColor}`,
+                      color: isSelected ? "#fff" : sc.color,
+                      backgroundColor: isSelected ? sc.color : "#F5F0E8",
+                      boxShadow: "4px 4px 0 #000",
                     }}
                   >
                     <span className="block text-lg">{sc.suit}</span>
