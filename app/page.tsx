@@ -102,22 +102,23 @@ export default function Home() {
   const selectedSuit = SUIT_COLORS[BUY_IN_OPTIONS.indexOf(selected as typeof BUY_IN_OPTIONS[number])];
 
   return (
-    <main className="min-h-dvh bg-black max-w-md mx-auto px-4 pt-8 pb-28">
+    <main className="min-h-dvh bg-white max-w-md mx-auto px-4 pt-8 pb-28">
 
       {/* Header */}
       <div
-        className="border-4 p-5 mb-6"
-        style={{ borderColor: "#ef4444", boxShadow: "6px 6px 0 #ef4444" }}
+        className="border-4 border-black p-5 mb-6"
+        style={{ boxShadow: "6px 6px 0 #000" }}
       >
         <div className="flex items-end justify-between">
-          <h1 className="text-5xl font-black uppercase tracking-tight text-white leading-none">
+          <h1 className="text-5xl font-black uppercase tracking-tight text-black leading-none">
             Poker<br />Settler
           </h1>
-          <div className="text-right text-3xl leading-none font-black" style={{ color: "#ef4444" }}>
-            ♠♥<br />♦♣
+          <div className="text-right text-3xl leading-none font-black">
+            <span style={{ color: "#000" }}>♠</span><span style={{ color: "#ef4444" }}>♥</span><br />
+            <span style={{ color: "#3b82f6" }}>♦</span><span style={{ color: "#22c55e" }}>♣</span>
           </div>
         </div>
-        <div className="mt-3 border-t-2 border-white/10 pt-3">
+        <div className="mt-3 border-t-2 border-black/10 pt-3">
           <AnimatedTagline />
         </div>
       </div>
@@ -125,7 +126,7 @@ export default function Home() {
       {/* Active games */}
       {!loadingGames && activeGames.length > 0 && (
         <section className="mb-6">
-          <p className="text-xs font-black uppercase tracking-widest mb-3 pb-1 border-b-2" style={{ color: "#3b82f6", borderColor: "#3b82f6" }}>
+          <p className="text-xs font-black uppercase tracking-widest mb-3 pb-1 border-b-2 border-black text-black">
             ♦ Active games
           </p>
           <div className="space-y-3">
@@ -133,17 +134,17 @@ export default function Home() {
               <button
                 key={game.code}
                 onClick={() => router.push(`/game/${game.code}`)}
-                className="w-full flex items-center justify-between border-2 px-4 py-4 active:translate-x-1 active:translate-y-1 transition-transform bg-black"
-                style={{ borderColor: "#3b82f6", boxShadow: "4px 4px 0 #3b82f6" }}
+                className="w-full flex items-center justify-between border-2 border-black px-4 py-4 active:translate-x-1 active:translate-y-1 transition-transform bg-white"
+                style={{ boxShadow: "4px 4px 0 #000" }}
               >
                 <div className="text-left">
-                  <p className="text-white font-black text-sm uppercase">{game.title ?? `Game ${game.code}`}</p>
-                  <p className="text-xs font-bold mt-0.5" style={{ color: "#3b82f6" }}>
+                  <p className="text-black font-black text-sm uppercase">{game.title ?? `Game ${game.code}`}</p>
+                  <p className="text-xs font-bold mt-0.5 text-black/50">
                     {game.buy_in} 🍭 · {formatDate(game.created_at)}
                     {game.password && <LockClosedIcon className="inline w-3 h-3 ml-1" />}
                   </p>
                 </div>
-                <ArrowRightCircleIcon className="w-6 h-6 shrink-0" style={{ color: "#3b82f6" }} />
+                <ArrowRightCircleIcon className="w-6 h-6 shrink-0 text-black" />
               </button>
             ))}
           </div>
@@ -152,28 +153,29 @@ export default function Home() {
 
       {/* New game */}
       <section>
-        <p className="text-xs font-black uppercase tracking-widest mb-3 pb-1 border-b-2" style={{ color: "#22c55e", borderColor: "#22c55e" }}>
+        <p className="text-xs font-black uppercase tracking-widest mb-3 pb-1 border-b-2 border-black text-black">
           ♣ New game
         </p>
 
         <div className="space-y-4">
           {/* Buy-in */}
           <div>
-            <p className="text-xs font-bold uppercase text-white/50 mb-2">Buy-in amount</p>
+            <p className="text-xs font-bold uppercase text-black/50 mb-2">Buy-in amount</p>
             <div className="flex gap-3">
               {BUY_IN_OPTIONS.map((amount, i) => {
                 const sc = SUIT_COLORS[i];
                 const isSelected = selected === amount;
+                const borderAndShadowColor = sc.color === "#ffffff" ? "#000" : sc.color;
                 return (
                   <button
                     key={amount}
                     onClick={() => setSelected(amount)}
-                    className="flex-1 py-4 border-2 text-xl font-black uppercase bg-black active:translate-x-0.5 active:translate-y-0.5 transition-transform"
+                    className="flex-1 py-4 border-2 text-xl font-black uppercase active:translate-x-0.5 active:translate-y-0.5 transition-transform"
                     style={{
-                      borderColor: sc.color,
-                      color: isSelected ? "#000" : sc.color,
-                      backgroundColor: isSelected ? sc.color : "#000",
-                      boxShadow: `4px 4px 0 ${sc.color}`,
+                      borderColor: borderAndShadowColor,
+                      color: isSelected ? "#fff" : borderAndShadowColor,
+                      backgroundColor: isSelected ? borderAndShadowColor : "#fff",
+                      boxShadow: `4px 4px 0 ${borderAndShadowColor}`,
                     }}
                   >
                     <span className="block text-lg">{sc.suit}</span>
@@ -186,29 +188,29 @@ export default function Home() {
 
           {/* Title */}
           <div>
-            <p className="text-xs font-bold uppercase text-white/50 mb-2">
-              Game title <span className="normal-case font-normal opacity-50">(optional)</span>
+            <p className="text-xs font-bold uppercase text-black/50 mb-2">
+              Game title <span className="normal-case font-normal">(optional)</span>
             </p>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. The Revenge Game"
-              className="w-full bg-black border-2 border-white/30 text-white px-4 py-3 text-sm font-bold placeholder:text-white/20 placeholder:font-normal focus:outline-none focus:border-white"
+              className="w-full bg-white border-2 border-black text-black px-4 py-3 text-sm font-bold placeholder:text-black/30 placeholder:font-normal focus:outline-none focus:ring-2 focus:ring-black"
             />
           </div>
 
           {/* Password */}
           <div>
-            <p className="text-xs font-bold uppercase text-white/50 mb-2">
-              Password <span className="normal-case font-normal opacity-50">(optional)</span>
+            <p className="text-xs font-bold uppercase text-black/50 mb-2">
+              Password <span className="normal-case font-normal">(optional)</span>
             </p>
             <input
               type="text"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Leave blank for no password"
-              className="w-full bg-black border-2 border-white/30 text-white px-4 py-3 text-sm font-bold placeholder:text-white/20 placeholder:font-normal focus:outline-none focus:border-white"
+              className="w-full bg-white border-2 border-black text-black px-4 py-3 text-sm font-bold placeholder:text-black/30 placeholder:font-normal focus:outline-none focus:ring-2 focus:ring-black"
             />
           </div>
 
@@ -216,12 +218,12 @@ export default function Home() {
           <button
             disabled={creating}
             onClick={handleCreate}
-            className="w-full py-5 border-2 text-black text-xl font-black uppercase tracking-wider active:translate-x-1 active:translate-y-1 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full py-5 border-2 border-black text-black text-xl font-black uppercase tracking-wider active:translate-x-1 active:translate-y-1 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
             style={{
-              backgroundColor: selectedSuit?.color ?? "#22c55e",
-              borderColor: selectedSuit?.color ?? "#22c55e",
-              boxShadow: `5px 5px 0 ${selectedSuit?.color ?? "#22c55e"}88`,
-              color: "#000",
+              backgroundColor: selectedSuit?.color === "#ffffff" ? "#000" : (selectedSuit?.color ?? "#22c55e"),
+              borderColor: "#000",
+              boxShadow: "5px 5px 0 #000",
+              color: "#fff",
             }}
           >
             {creating ? "Creating…" : `${selectedSuit?.suit ?? "♣"} Let's Play`}
