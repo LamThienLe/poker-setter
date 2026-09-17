@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { type GameRow } from "@/lib/game";
 import { type Player } from "@/lib/types";
@@ -85,6 +86,7 @@ const RANK_LABEL: Record<number, string> = { 0: "🏆", 1: "🥈", 2: "🥉" };
 
 
 export default function StatsPage() {
+  const router = useRouter();
   const [returnTo] = useState<string | null>(() => {
     if (typeof window === "undefined") return null;
     return new URLSearchParams(window.location.search).get("returnTo");
@@ -150,7 +152,11 @@ export default function StatsPage() {
             <p className="text-xs text-slate-500 uppercase tracking-widest font-medium mb-3">Leaderboard</p>
             <div className="rounded-lg bg-slate-800 divide-y divide-slate-700">
               {playerStats.map((stats, index) => (
-                <div key={stats.name} className="px-4 py-3">
+                <div
+                  key={stats.name}
+                  className="px-4 py-3 active:bg-slate-700 cursor-pointer"
+                  onClick={() => router.push(`/players/${encodeURIComponent(stats.name)}`)}
+                >
                   <div className="flex items-center gap-3">
                     <span className="text-base w-6 shrink-0 text-center">
                       {RANK_LABEL[index] ?? <span className="text-slate-500 text-sm tabular-nums">{index + 1}</span>}
