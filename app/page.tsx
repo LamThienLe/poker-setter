@@ -19,7 +19,7 @@ const TAGLINES = [
 ];
 
 const SUIT_COLORS = [
-  { suit: "♠", color: "#ffffff", label: "200" },
+  { suit: "♠", color: "#22c55e", label: "200" },
   { suit: "♥", color: "#ef4444", label: "250" },
   { suit: "♦", color: "#3b82f6", label: "500" },
 ];
@@ -165,7 +165,7 @@ export default function Home() {
               {BUY_IN_OPTIONS.map((amount, i) => {
                 const sc = SUIT_COLORS[i];
                 const isSelected = selected === amount;
-                const borderAndShadowColor = sc.color === "#ffffff" ? "#000" : sc.color;
+                const borderAndShadowColor = sc.color;
                 return (
                   <button
                     key={amount}
@@ -222,7 +222,7 @@ export default function Home() {
             onClick={handleCreate}
             className="w-full py-5 border-2 border-black text-black text-xl font-black uppercase tracking-wider active:translate-x-1 active:translate-y-1 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
             style={{
-              backgroundColor: selectedSuit?.color === "#ffffff" ? "#000" : (selectedSuit?.color ?? "#22c55e"),
+              backgroundColor: selectedSuit?.color ?? "#22c55e",
               borderColor: "#000",
               boxShadow: "5px 5px 0 #000",
               color: "#fff",
