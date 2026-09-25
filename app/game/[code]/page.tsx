@@ -576,7 +576,7 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
   return (
     <>
       {showQR && <QRModal url={gameUrl} onClose={() => setShowQR(false)} />}
-      <main className="max-w-md mx-auto px-4 pt-5 pb-32 min-h-dvh" style={{ backgroundColor: BG }}>
+      <main className="max-w-md mx-auto px-4 pt-5 pb-48 min-h-dvh overflow-y-auto" style={{ backgroundColor: BG }}>
 
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
