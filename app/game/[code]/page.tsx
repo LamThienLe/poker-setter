@@ -145,12 +145,14 @@ function PlayerRow({
         ))}
       </select>
 
-      <div className="flex items-center shrink-0">
+      <div className="flex items-center shrink-0 gap-1">
         <button
           disabled={locked || player.buyIns <= 1}
           onClick={() => onUpdate({ buyIns: player.buyIns - 1 })}
-          className="flex items-center justify-center border border-black text-black text-base font-black disabled:opacity-30 active:bg-black active:text-white touch-manipulation"
-          style={{ minWidth: 36, minHeight: 36, width: 28, height: 28, backgroundColor: BG }}
+          className="flex items-center justify-center border-2 border-black text-black text-base font-black disabled:opacity-30 active:translate-x-0.5 active:translate-y-0.5 transition-transform touch-manipulation"
+          style={{ minWidth: 36, minHeight: 36, width: 32, height: 32, backgroundColor: BG, boxShadow: "2px 2px 0 #000" }}
+          onTouchStart={(e) => { e.currentTarget.style.backgroundColor = "#f87171"; e.currentTarget.style.boxShadow = "0px 0px 0 #000"; }}
+          onTouchEnd={(e) => { e.currentTarget.style.backgroundColor = BG; e.currentTarget.style.boxShadow = "2px 2px 0 #000"; }}
         >
           −
         </button>
@@ -160,8 +162,10 @@ function PlayerRow({
         <button
           disabled={locked}
           onClick={() => { onUpdate({ buyIns: player.buyIns + 1 }); onRebuy(); }}
-          className="flex items-center justify-center border border-black text-black text-base font-black disabled:opacity-30 active:bg-black active:text-white touch-manipulation"
-          style={{ minWidth: 36, minHeight: 36, width: 28, height: 28, backgroundColor: BG }}
+          className="flex items-center justify-center border-2 border-black text-black text-base font-black disabled:opacity-30 active:translate-x-0.5 active:translate-y-0.5 transition-transform touch-manipulation"
+          style={{ minWidth: 36, minHeight: 36, width: 32, height: 32, backgroundColor: BG, boxShadow: "2px 2px 0 #000" }}
+          onTouchStart={(e) => { e.currentTarget.style.backgroundColor = "#34d399"; e.currentTarget.style.boxShadow = "0px 0px 0 #000"; }}
+          onTouchEnd={(e) => { e.currentTarget.style.backgroundColor = BG; e.currentTarget.style.boxShadow = "2px 2px 0 #000"; }}
         >
           +
         </button>
