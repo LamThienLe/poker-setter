@@ -10,6 +10,7 @@ export interface GameRow {
   title: string | null;
   pot: number | null;
   pot_history: number[] | null;
+  hand_history: number[] | null;
 }
 
 export function generateGameCode(): string {

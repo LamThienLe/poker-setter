@@ -563,8 +563,11 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
 
   async function clearPot() {
     if (!game) return;
+    const current = game.pot ?? 0;
+    if (current === 0) return;
     vibrate([30, 20, 30]);
-    await pushGame({ pot: 0, pot_history: [] });
+    const newHandHistory = [...(game.hand_history ?? []), current];
+    await pushGame({ pot: 0, pot_history: [], hand_history: newHandHistory });
   }
 
   if (pageState === "loading") {
@@ -713,7 +716,7 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
                 </div>
               </div>
               <p className="text-4xl font-black tabular-nums text-black mb-4">{(game.pot ?? 0).toLocaleString()} 🍭</p>
-              <div className="grid grid-cols-6 gap-1.5">
+              <div className="grid grid-cols-6 gap-1.5 mb-4">
                 {CHIP_DENOMINATIONS.map((chip) => (
                   <button
                     key={chip}
@@ -725,55 +728,99 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
                   </button>
                 ))}
               </div>
+              {(game.hand_history ?? []).length > 0 && (
+                <div className="border-t-2 border-black pt-3">
+                  <p className="text-xs font-black uppercase text-black/40 mb-2 tracking-widest">Hands played</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {(game.hand_history ?? []).map((pot, i) => (
+                      <span key={i} className="text-xs font-black tabular-nums border border-black px-2 py-1 text-black" style={{ backgroundColor: BG }}>
+                        #{i + 1} · {pot.toLocaleString()}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
-          {/* Tab 1 — Players / rebuys (also shown in preview/settled) */}
+          {/* Tab 1 — Players / rebuys (active) or full rows (preview/settled) */}
           {(pageState !== "active" || activeTab === 1) && (
             <>
-              {availableToAdd.length > 0 && !locked && (
-                <div className="border-2 border-black p-2 flex items-center gap-2 mb-3" style={{ boxShadow: "3px 3px 0 #000" }}>
-                  <select
-                    value={addingName}
-                    onChange={(e) => setAddingName(e.target.value)}
-                    className="flex-1 min-w-0 border border-black text-black px-3 py-3 text-sm font-black uppercase focus:outline-none"
-                    style={{ backgroundColor: BG }}
-                  >
-                    {availableToAdd.map((name) => (
-                      <option key={name} value={name}>{name}</option>
-                    ))}
-                  </select>
-                  <button
-                    onClick={addPlayer}
-                    className="px-4 h-11 flex items-center justify-center border-2 border-black text-white text-sm font-black uppercase active:translate-x-0.5 active:translate-y-0.5 transition-transform touch-manipulation shrink-0"
-                    style={{ backgroundColor: "#22c55e", boxShadow: "2px 2px 0 #000" }}
-                  >
-                    Add
-                  </button>
-                </div>
+              {/* Active: big rebuy buttons */}
+              {pageState === "active" && (
+                <>
+                  {availableToAdd.length > 0 && (
+                    <div className="border-2 border-black p-2 flex items-center gap-2 mb-3" style={{ boxShadow: "3px 3px 0 #000" }}>
+                      <select
+                        value={addingName}
+                        onChange={(e) => setAddingName(e.target.value)}
+                        className="flex-1 min-w-0 border border-black text-black px-3 py-3 text-sm font-black uppercase focus:outline-none"
+                        style={{ backgroundColor: BG }}
+                      >
+                        {availableToAdd.map((name) => (
+                          <option key={name} value={name}>{name}</option>
+                        ))}
+                      </select>
+                      <button
+                        onClick={addPlayer}
+                        className="px-4 h-11 flex items-center justify-center border-2 border-black text-white text-sm font-black uppercase active:translate-x-0.5 active:translate-y-0.5 transition-transform touch-manipulation shrink-0"
+                        style={{ backgroundColor: "#22c55e", boxShadow: "2px 2px 0 #000" }}
+                      >
+                        Add
+                      </button>
+                    </div>
+                  )}
+
+                  {game.players.length === 0 && (
+                    <p className="text-center text-black/40 text-sm py-12 font-bold">
+                      Hit Add to add players as they sit down
+                    </p>
+                  )}
+
+                  {game.players.length > 0 && (
+                    <div className="space-y-2">
+                      {game.players.map((player) => (
+                        <div key={player.id} className="border-2 border-black flex items-center" style={{ boxShadow: "3px 3px 0 #000" }}>
+                          <button
+                            onClick={() => { updatePlayer(player.id, { buyIns: player.buyIns + 1 }); vibrate(40); playSound(SOUNDS.rebuy); }}
+                            className="flex-1 py-4 text-left px-4 active:bg-black active:text-white touch-manipulation"
+                          >
+                            <span className="text-base font-black uppercase text-black">{player.name}</span>
+                            <span className="text-xs font-black text-black/40 ml-2">×{player.buyIns}</span>
+                          </button>
+                          <button
+                            onClick={() => removePlayer(player.id)}
+                            className="px-3 py-4 border-l-2 border-black text-black/30 active:bg-red-500 active:text-white touch-manipulation font-black text-sm"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
               )}
 
-              {game.players.length === 0 && (
-                <p className="text-center text-black/40 text-sm py-12 font-bold">
-                  Hit Add to add players as they sit down
-                </p>
-              )}
-
-              {game.players.length > 0 && (
-                <div className="border-2 border-black px-3" style={{ boxShadow: "4px 4px 0 #000" }}>
-                  {game.players.map((player) => (
-                    <PlayerRow
-                      key={player.id}
-                      player={player}
-                      usedNames={usedNames}
-                      availableNames={knownPlayers}
-                      onUpdate={(updates) => updatePlayer(player.id, updates)}
-                      onRemove={() => removePlayer(player.id)}
-                      onRebuy={() => { vibrate(40); playSound(SOUNDS.rebuy); }}
-                      locked={locked}
-                    />
-                  ))}
-                </div>
+              {/* Preview/settled: full PlayerRow for chip entry */}
+              {(pageState === "preview" || pageState === "settled") && (
+                <>
+                  {game.players.length > 0 && (
+                    <div className="border-2 border-black px-3" style={{ boxShadow: "4px 4px 0 #000" }}>
+                      {game.players.map((player) => (
+                        <PlayerRow
+                          key={player.id}
+                          player={player}
+                          usedNames={usedNames}
+                          availableNames={knownPlayers}
+                          onUpdate={(updates) => updatePlayer(player.id, updates)}
+                          onRemove={() => removePlayer(player.id)}
+                          onRebuy={() => { vibrate(40); playSound(SOUNDS.rebuy); }}
+                          locked={locked}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </>
               )}
             </>
           )}
