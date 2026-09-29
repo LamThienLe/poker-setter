@@ -700,7 +700,7 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
                   <button
                     onClick={undoLastChip}
                     disabled={(game.pot_history ?? []).length === 0}
-                    className="text-xs font-black uppercase border border-black px-2 py-1 disabled:opacity-30 active:bg-black active:text-white touch-manipulation"
+                    className="text-xs font-black uppercase border border-black text-black px-2 py-1 disabled:opacity-30 active:bg-black active:text-white touch-manipulation"
                     style={{ backgroundColor: BG }}
                   >
                     Undo
@@ -708,7 +708,7 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
                   <button
                     onClick={clearPot}
                     disabled={(game.pot ?? 0) === 0}
-                    className="text-xs font-black uppercase border border-black px-2 py-1 disabled:opacity-30 active:bg-black active:text-white touch-manipulation"
+                    className="text-xs font-black uppercase border border-black text-black px-2 py-1 disabled:opacity-30 active:bg-black active:text-white touch-manipulation"
                     style={{ backgroundColor: BG }}
                   >
                     Clear
@@ -784,7 +784,7 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
                           {/* Rebuy tap */}
                           <button
                             onClick={() => { updatePlayer(player.id, { buyIns: player.buyIns + 1 }); vibrate(40); playSound(SOUNDS.rebuy); }}
-                            className="flex items-center gap-1.5 shrink-0 border border-black px-2 py-2 active:bg-black active:text-white touch-manipulation"
+                            className="flex items-center gap-1.5 shrink-0 border border-black text-black px-2 py-2 active:bg-black active:text-white touch-manipulation"
                             style={{ backgroundColor: BG }}
                           >
                             <span className="text-sm font-black uppercase text-black">{player.name}</span>
