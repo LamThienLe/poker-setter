@@ -134,7 +134,7 @@ function PlayerRow({
         value={player.name}
         disabled={locked}
         onChange={(e) => onUpdate({ name: e.target.value })}
-        className="w-24 shrink-0 border border-black text-black px-2 py-2 text-sm font-black uppercase disabled:opacity-60 disabled:cursor-not-allowed"
+        className="w-16 shrink-0 border border-black text-black px-1 py-2 text-xs font-black uppercase disabled:opacity-60 disabled:cursor-not-allowed"
         style={{ backgroundColor: BG }}
       >
         {selectableNames.map((name) => (
@@ -144,23 +144,23 @@ function PlayerRow({
         ))}
       </select>
 
-      <div className="flex items-center gap-1 shrink-0">
+      <div className="flex items-center shrink-0">
         <button
           disabled={locked || player.buyIns <= 1}
           onClick={() => onUpdate({ buyIns: player.buyIns - 1 })}
-          className="flex items-center justify-center border border-black text-black text-lg font-black disabled:opacity-30 active:bg-black active:text-white touch-manipulation"
-          style={{ minWidth: 44, minHeight: 44, width: 32, height: 32, backgroundColor: BG }}
+          className="flex items-center justify-center border border-black text-black text-base font-black disabled:opacity-30 active:bg-black active:text-white touch-manipulation"
+          style={{ minWidth: 36, minHeight: 36, width: 28, height: 28, backgroundColor: BG }}
         >
           −
         </button>
-        <span className="w-5 text-center text-sm font-black tabular-nums text-black">
+        <span className="w-4 text-center text-xs font-black tabular-nums text-black">
           {player.buyIns}
         </span>
         <button
           disabled={locked}
           onClick={() => { onUpdate({ buyIns: player.buyIns + 1 }); onRebuy(); }}
-          className="flex items-center justify-center border border-black text-black text-lg font-black disabled:opacity-30 active:bg-black active:text-white touch-manipulation"
-          style={{ minWidth: 44, minHeight: 44, width: 32, height: 32, backgroundColor: BG }}
+          className="flex items-center justify-center border border-black text-black text-base font-black disabled:opacity-30 active:bg-black active:text-white touch-manipulation"
+          style={{ minWidth: 36, minHeight: 36, width: 28, height: 28, backgroundColor: BG }}
         >
           +
         </button>
