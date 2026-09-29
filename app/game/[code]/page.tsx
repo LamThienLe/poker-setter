@@ -720,24 +720,24 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
                   <button
                     onClick={undoLastChip}
                     disabled={(game.pot_history ?? []).length === 0}
-                    className="text-xs font-black uppercase border border-black text-black px-2 py-1 disabled:opacity-30 active:bg-black active:text-white touch-manipulation"
-                    style={{ backgroundColor: BG }}
+                    className="text-xs font-black uppercase border-2 border-black text-black px-2 py-1 disabled:opacity-30 active:translate-x-0.5 active:translate-y-0.5 transition-transform touch-manipulation"
+                    style={{ backgroundColor: BG, boxShadow: "2px 2px 0 #000" }}
                   >
                     Undo
                   </button>
                   <button
                     onClick={clearPot}
                     disabled={(game.pot ?? 0) === 0}
-                    className="text-xs font-black uppercase border border-black text-black px-2 py-1 disabled:opacity-30 active:bg-black active:text-white touch-manipulation"
-                    style={{ backgroundColor: BG }}
+                    className="text-xs font-black uppercase border-2 border-black text-black px-2 py-1 disabled:opacity-30 active:translate-x-0.5 active:translate-y-0.5 transition-transform touch-manipulation"
+                    style={{ backgroundColor: BG, boxShadow: "2px 2px 0 #000" }}
                   >
                     Clear
                   </button>
                   <button
                     onClick={nextHand}
                     disabled={(game.pot ?? 0) === 0}
-                    className="text-xs font-black uppercase border border-black text-black px-2 py-1 disabled:opacity-30 active:bg-black active:text-white touch-manipulation"
-                    style={{ backgroundColor: "#22c55e" }}
+                    className="text-xs font-black uppercase border-2 border-black text-black px-2 py-1 disabled:opacity-30 active:translate-x-0.5 active:translate-y-0.5 transition-transform touch-manipulation"
+                    style={{ backgroundColor: "#22c55e", boxShadow: "2px 2px 0 #000" }}
                   >
                     Next
                   </button>
