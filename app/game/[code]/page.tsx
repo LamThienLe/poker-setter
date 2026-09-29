@@ -561,13 +561,20 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
     await pushGame({ pot: newPot, pot_history: newHistory });
   }
 
-  async function clearPot() {
+  async function nextHand() {
     if (!game) return;
     const current = game.pot ?? 0;
     if (current === 0) return;
     vibrate([30, 20, 30]);
     const newHandHistory = [...(game.hand_history ?? []), current];
     await pushGame({ pot: 0, pot_history: [], hand_history: newHandHistory });
+  }
+
+  async function clearPot() {
+    if (!game) return;
+    if ((game.pot ?? 0) === 0) return;
+    vibrate([30, 20, 30]);
+    await pushGame({ pot: 0, pot_history: [] });
   }
 
   if (pageState === "loading") {
@@ -712,6 +719,14 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
                     style={{ backgroundColor: BG }}
                   >
                     Clear
+                  </button>
+                  <button
+                    onClick={nextHand}
+                    disabled={(game.pot ?? 0) === 0}
+                    className="text-xs font-black uppercase border border-black text-black px-2 py-1 disabled:opacity-30 active:bg-black active:text-white touch-manipulation"
+                    style={{ backgroundColor: "#22c55e" }}
+                  >
+                    Next
                   </button>
                 </div>
               </div>
