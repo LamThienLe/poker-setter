@@ -22,6 +22,17 @@ const SUIT_COLORS = [
   { suit: "♦", color: "#3b82f6", label: "500" },
 ];
 
+const BG = "#F5F0E8";
+
+function pressHandlers(flashColor: string, shadow = "4px 4px 0 #000", restoreColor = BG) {
+  return {
+    onMouseDown: (e: React.MouseEvent<HTMLButtonElement>) => { e.currentTarget.style.backgroundColor = flashColor; e.currentTarget.style.boxShadow = "0px 0px 0 #000"; },
+    onMouseUp: (e: React.MouseEvent<HTMLButtonElement>) => { e.currentTarget.style.backgroundColor = restoreColor; e.currentTarget.style.boxShadow = shadow; },
+    onTouchStart: (e: React.TouchEvent<HTMLButtonElement>) => { e.currentTarget.style.backgroundColor = flashColor; e.currentTarget.style.boxShadow = "0px 0px 0 #000"; },
+    onTouchEnd: (e: React.TouchEvent<HTMLButtonElement>) => { e.currentTarget.style.backgroundColor = restoreColor; e.currentTarget.style.boxShadow = shadow; },
+  };
+}
+
 
 function AnimatedTagline() {
   const [index, setIndex] = useState(0);
@@ -136,6 +147,7 @@ export default function Home() {
                   onClick={() => router.push(`/game/${game.code}`)}
                   className="w-full flex items-center justify-between border-2 border-black px-4 py-4 active:translate-x-1 active:translate-y-1 transition-transform"
                   style={{ backgroundColor: accentColor, boxShadow: "4px 4px 0 #000" }}
+                  {...pressHandlers("#fbbf24", "4px 4px 0 #000", accentColor)}
                 >
                   <div className="text-left">
                     <p className="text-white font-black text-sm uppercase">{game.title ?? `Game ${game.code}`}</p>
@@ -173,9 +185,10 @@ export default function Home() {
                     className="flex-1 py-4 border-2 border-black text-xl font-black uppercase active:translate-x-0.5 active:translate-y-0.5 transition-transform"
                     style={{
                       color: isSelected ? "#fff" : sc.color,
-                      backgroundColor: isSelected ? sc.color : "#F5F0E8",
+                      backgroundColor: isSelected ? sc.color : BG,
                       boxShadow: "4px 4px 0 #000",
                     }}
+                    {...pressHandlers("#fbbf24", "4px 4px 0 #000", isSelected ? sc.color : BG)}
                   >
                     <span className="block text-lg">{sc.suit}</span>
                     {amount}
@@ -226,6 +239,7 @@ export default function Home() {
               boxShadow: "5px 5px 0 #000",
               color: "#fff",
             }}
+            {...pressHandlers("#fbbf24", "5px 5px 0 #000", selectedSuit?.color ?? "#22c55e")}
           >
             {creating ? "Creating…" : `${selectedSuit?.suit ?? "♣"} Let's Play`}
           </button>
