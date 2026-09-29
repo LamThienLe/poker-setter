@@ -743,13 +743,17 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
                 </div>
               </div>
               <p className="text-4xl font-black tabular-nums text-black mb-4">{(game.pot ?? 0).toLocaleString()} 🍭</p>
-              <div className="grid grid-cols-6 gap-1.5 mb-4">
+              <div className="grid grid-cols-6 gap-3 mb-4">
                 {CHIP_DENOMINATIONS.map((chip) => (
                   <button
                     key={chip}
                     onClick={() => addChipToPot(chip)}
-                    className="py-3 border-2 border-black text-black text-sm font-black active:bg-black active:text-white active:translate-x-0.5 active:translate-y-0.5 transition-transform touch-manipulation"
-                    style={{ backgroundColor: BG, boxShadow: "2px 2px 0 #000" }}
+                    className="py-4 border-2 border-black text-black text-sm font-black touch-manipulation transition-all active:translate-x-1 active:translate-y-1"
+                    style={{ backgroundColor: BG, boxShadow: "4px 4px 0 #000" }}
+                    onMouseDown={(e) => (e.currentTarget.style.boxShadow = "0px 0px 0 #000")}
+                    onMouseUp={(e) => (e.currentTarget.style.boxShadow = "4px 4px 0 #000")}
+                    onTouchStart={(e) => (e.currentTarget.style.boxShadow = "0px 0px 0 #000")}
+                    onTouchEnd={(e) => (e.currentTarget.style.boxShadow = "4px 4px 0 #000")}
                   >
                     {chip}
                   </button>
