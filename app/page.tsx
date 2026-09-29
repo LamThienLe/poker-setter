@@ -188,7 +188,7 @@ export default function Home() {
                       backgroundColor: isSelected ? sc.color : BG,
                       boxShadow: "4px 4px 0 #000",
                     }}
-                    {...pressHandlers(isSelected ? sc.color : "#fbbf24", "4px 4px 0 #000", isSelected ? sc.color : BG)}
+                    {...pressHandlers(isSelected ? sc.color : BG, "4px 4px 0 #000", isSelected ? sc.color : BG)}
                   >
                     <span className="block text-lg">{sc.suit}</span>
                     {amount}
