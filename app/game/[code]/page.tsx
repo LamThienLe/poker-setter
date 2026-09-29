@@ -22,6 +22,7 @@ import {
 
 const BG = "#F5F0E8";
 const CHIP_DENOMINATIONS = [1, 5, 10, 25, 50, 100];
+const CHIP_COLORS = ["#fbbf24", "#f87171", "#34d399", "#60a5fa", "#a78bfa", "#fb923c"];
 
 
 function generateId() {
@@ -744,16 +745,16 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
               </div>
               <p className="text-4xl font-black tabular-nums text-black mb-4">{(game.pot ?? 0).toLocaleString()} 🍭</p>
               <div className="grid grid-cols-6 gap-3 mb-4">
-                {CHIP_DENOMINATIONS.map((chip) => (
+                {CHIP_DENOMINATIONS.map((chip, i) => (
                   <button
                     key={chip}
                     onClick={() => addChipToPot(chip)}
                     className="py-4 border-2 border-black text-black text-sm font-black touch-manipulation transition-all active:translate-x-1 active:translate-y-1"
                     style={{ backgroundColor: BG, boxShadow: "4px 4px 0 #000" }}
-                    onMouseDown={(e) => (e.currentTarget.style.boxShadow = "0px 0px 0 #000")}
-                    onMouseUp={(e) => (e.currentTarget.style.boxShadow = "4px 4px 0 #000")}
-                    onTouchStart={(e) => (e.currentTarget.style.boxShadow = "0px 0px 0 #000")}
-                    onTouchEnd={(e) => (e.currentTarget.style.boxShadow = "4px 4px 0 #000")}
+                    onMouseDown={(e) => { e.currentTarget.style.boxShadow = "0px 0px 0 #000"; e.currentTarget.style.backgroundColor = CHIP_COLORS[i]; }}
+                    onMouseUp={(e) => { e.currentTarget.style.boxShadow = "4px 4px 0 #000"; e.currentTarget.style.backgroundColor = BG; }}
+                    onTouchStart={(e) => { e.currentTarget.style.boxShadow = "0px 0px 0 #000"; e.currentTarget.style.backgroundColor = CHIP_COLORS[i]; }}
+                    onTouchEnd={(e) => { e.currentTarget.style.boxShadow = "4px 4px 0 #000"; e.currentTarget.style.backgroundColor = BG; }}
                   >
                     {chip}
                   </button>
