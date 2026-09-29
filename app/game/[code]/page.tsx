@@ -24,12 +24,12 @@ const BG = "#F5F0E8";
 const CHIP_DENOMINATIONS = [1, 5, 10, 25, 50, 100];
 const CHIP_COLORS = ["#fbbf24", "#f87171", "#34d399", "#60a5fa", "#a78bfa", "#fb923c"];
 
-function pressHandlers(color: string, shadow = "2px 2px 0 #000") {
+function pressHandlers(flashColor: string, shadow = "2px 2px 0 #000", restoreColor = BG) {
   return {
-    onMouseDown: (e: React.MouseEvent<HTMLButtonElement>) => { e.currentTarget.style.backgroundColor = color; e.currentTarget.style.boxShadow = "0px 0px 0 #000"; },
-    onMouseUp: (e: React.MouseEvent<HTMLButtonElement>) => { e.currentTarget.style.backgroundColor = ""; e.currentTarget.style.boxShadow = shadow; },
-    onTouchStart: (e: React.TouchEvent<HTMLButtonElement>) => { e.currentTarget.style.backgroundColor = color; e.currentTarget.style.boxShadow = "0px 0px 0 #000"; },
-    onTouchEnd: (e: React.TouchEvent<HTMLButtonElement>) => { e.currentTarget.style.backgroundColor = ""; e.currentTarget.style.boxShadow = shadow; },
+    onMouseDown: (e: React.MouseEvent<HTMLButtonElement>) => { e.currentTarget.style.backgroundColor = flashColor; e.currentTarget.style.boxShadow = "0px 0px 0 #000"; },
+    onMouseUp: (e: React.MouseEvent<HTMLButtonElement>) => { e.currentTarget.style.backgroundColor = restoreColor; e.currentTarget.style.boxShadow = shadow; },
+    onTouchStart: (e: React.TouchEvent<HTMLButtonElement>) => { e.currentTarget.style.backgroundColor = flashColor; e.currentTarget.style.boxShadow = "0px 0px 0 #000"; },
+    onTouchEnd: (e: React.TouchEvent<HTMLButtonElement>) => { e.currentTarget.style.backgroundColor = restoreColor; e.currentTarget.style.boxShadow = shadow; },
   };
 }
 
@@ -748,7 +748,7 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
                     disabled={(game.pot ?? 0) === 0}
                     className="text-xs font-black uppercase border-2 border-black text-black px-2 py-1 disabled:opacity-30 active:translate-x-0.5 active:translate-y-0.5 transition-transform touch-manipulation"
                     style={{ backgroundColor: "#22c55e", boxShadow: "2px 2px 0 #000" }}
-                    {...pressHandlers("#34d399")}
+                    {...pressHandlers("#34d399", "2px 2px 0 #000", "#22c55e")}
                   >
                     Next
                   </button>
@@ -805,7 +805,7 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
                         onClick={addPlayer}
                         className="px-4 h-11 flex items-center justify-center border-2 border-black text-white text-sm font-black uppercase active:translate-x-0.5 active:translate-y-0.5 transition-transform touch-manipulation shrink-0"
                         style={{ backgroundColor: "#22c55e", boxShadow: "2px 2px 0 #000" }}
-                        {...pressHandlers("#34d399")}
+                        {...pressHandlers("#34d399", "2px 2px 0 #000", "#22c55e")}
                       >
                         Add
                       </button>
@@ -879,7 +879,7 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
               onClick={handleShare}
               className="w-full py-4 border-2 border-black text-white text-lg font-black uppercase active:translate-x-1 active:translate-y-1 transition-transform flex items-center justify-center gap-2 max-w-md mx-auto"
               style={{ backgroundColor: "#3b82f6", boxShadow: "5px 5px 0 #000" }}
-              {...pressHandlers("#60a5fa", "5px 5px 0 #000")}
+              {...pressHandlers("#60a5fa", "5px 5px 0 #000", "#3b82f6")}
             >
               <ShareIcon className="w-5 h-5" /> Share results
             </button>
@@ -908,7 +908,7 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
                 onClick={handleGG}
                 className="flex-1 py-4 border-2 border-black text-white text-xl font-black uppercase disabled:opacity-30 disabled:cursor-not-allowed active:translate-x-1 active:translate-y-1 transition-transform"
                 style={{ backgroundColor: "#22c55e", boxShadow: "5px 5px 0 #000" }}
-                {...pressHandlers("#34d399", "5px 5px 0 #000")}
+                {...pressHandlers("#34d399", "5px 5px 0 #000", "#22c55e")}
               >
                 GG
               </button>
@@ -928,7 +928,7 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
                 onClick={handleUnlock}
                 className="flex-1 py-4 border-2 border-black text-black text-base font-black uppercase active:translate-x-0.5 active:translate-y-0.5 transition-transform"
                 style={{ backgroundColor: "#fbbf24", boxShadow: "4px 4px 0 #000" }}
-                {...pressHandlers("#fb923c", "4px 4px 0 #000")}
+                {...pressHandlers("#fb923c", "4px 4px 0 #000", "#fbbf24")}
               >
                 Unlock
               </button>
@@ -936,7 +936,7 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
                 onClick={handleFinalGG}
                 className="flex-1 py-4 border-2 border-black text-white text-base font-black uppercase active:translate-x-1 active:translate-y-1 transition-transform"
                 style={{ backgroundColor: "#22c55e", boxShadow: "4px 4px 0 #000" }}
-                {...pressHandlers("#34d399", "4px 4px 0 #000")}
+                {...pressHandlers("#34d399", "4px 4px 0 #000", "#22c55e")}
               >
                 Final GG
               </button>
