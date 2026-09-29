@@ -4,8 +4,14 @@ create table if not exists games (
   buy_in      integer not null,
   players     jsonb not null default '[]',
   settled     boolean not null default false,
-  created_at  timestamptz not null default now()
+  created_at  timestamptz not null default now(),
+  pot         integer not null default 0,
+  pot_history jsonb not null default '[]'
 );
+
+-- Migration: add pot columns to existing table
+-- alter table games add column if not exists pot integer not null default 0;
+-- alter table games add column if not exists pot_history jsonb not null default '[]';
 
 -- Enable RLS
 alter table games enable row level security;
