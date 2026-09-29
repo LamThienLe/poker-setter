@@ -784,6 +784,7 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
                           <button
                             onClick={() => { updatePlayer(player.id, { buyIns: player.buyIns + 1 }); vibrate(40); playSound(SOUNDS.rebuy); }}
                             className="flex-1 py-4 text-left px-4 active:bg-black active:text-white touch-manipulation"
+                            style={{ backgroundColor: BG }}
                           >
                             <span className="text-base font-black uppercase text-black">{player.name}</span>
                             <span className="text-xs font-black text-black/40 ml-2">×{player.buyIns}</span>
@@ -791,6 +792,7 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
                           <button
                             onClick={() => removePlayer(player.id)}
                             className="px-3 py-4 border-l-2 border-black text-black/30 active:bg-red-500 active:text-white touch-manipulation font-black text-sm"
+                            style={{ backgroundColor: BG }}
                           >
                             ×
                           </button>
