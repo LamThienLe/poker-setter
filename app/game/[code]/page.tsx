@@ -366,6 +366,8 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
   const [activeTab, setActiveTab] = useState<0 | 1>(0);
   const touchStartX = useRef<number | null>(null);
   const pendingWrite = useRef(false);
+  const potFlushTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingPot = useRef<{ pot: number; history: number[] } | null>(null);
   const copyResetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const passwordRef = useRef<string | null>(null);
 
@@ -542,12 +544,22 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
     router.push("/");
   }
 
-  async function addChipToPot(chip: number) {
+  function addChipToPot(chip: number) {
     if (!game) return;
     vibrate(20);
-    const newPot = (game.pot ?? 0) + chip;
-    const newHistory = [...(game.pot_history ?? []), chip];
-    await pushGame({ pot: newPot, pot_history: newHistory });
+    const base = pendingPot.current ?? { pot: game.pot ?? 0, history: game.pot_history ?? [] };
+    const newPot = base.pot + chip;
+    const newHistory = [...base.history, chip];
+    pendingPot.current = { pot: newPot, history: newHistory };
+    pendingWrite.current = true;
+    setGame((prev) => prev ? { ...prev, pot: newPot, pot_history: newHistory } : prev);
+    if (potFlushTimer.current) clearTimeout(potFlushTimer.current);
+    potFlushTimer.current = setTimeout(async () => {
+      if (!pendingPot.current) return;
+      const { pot, history } = pendingPot.current;
+      pendingPot.current = null;
+      await supabase.from("games").update({ pot, pot_history: history }).eq("code", code);
+    }, 600);
   }
 
   async function undoLastChip() {
