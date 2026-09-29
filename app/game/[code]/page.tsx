@@ -780,35 +780,16 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
                   {game.players.length > 0 && (
                     <div className="border-2 border-black px-3" style={{ boxShadow: "4px 4px 0 #000" }}>
                       {game.players.map((player) => (
-                        <div key={player.id} className="flex items-center gap-2 py-2 border-b-2 border-black last:border-b-0">
-                          {/* Rebuy tap */}
-                          <button
-                            onClick={() => { updatePlayer(player.id, { buyIns: player.buyIns + 1 }); vibrate(40); playSound(SOUNDS.rebuy); }}
-                            className="flex items-center gap-1.5 shrink-0 border border-black text-black px-2 py-2 active:bg-black active:text-white touch-manipulation"
-                            style={{ backgroundColor: BG }}
-                          >
-                            <span className="text-sm font-black uppercase text-black">{player.name}</span>
-                            <span className="text-xs font-black text-black/40">×{player.buyIns}</span>
-                          </button>
-                          {/* Chip count */}
-                          <input
-                            type="number"
-                            inputMode="numeric"
-                            pattern="[0-9]*"
-                            value={player.chips}
-                            onChange={(e) => updatePlayer(player.id, { chips: e.target.value })}
-                            placeholder="chips"
-                            className="flex-1 min-w-0 border border-black text-black px-2 py-2 text-sm font-black placeholder:text-black/30 focus:outline-none focus:ring-1 focus:ring-black"
-                            style={{ backgroundColor: BG }}
-                          />
-                          <button
-                            onClick={() => removePlayer(player.id)}
-                            className="flex items-center justify-center border border-black text-black/40 active:bg-red-500 active:text-white active:border-red-500 text-base leading-none shrink-0 touch-manipulation font-black"
-                            style={{ minWidth: 44, minHeight: 44, width: 28, height: 28, backgroundColor: BG }}
-                          >
-                            ×
-                          </button>
-                        </div>
+                        <PlayerRow
+                          key={player.id}
+                          player={player}
+                          usedNames={usedNames}
+                          availableNames={knownPlayers}
+                          onUpdate={(updates) => updatePlayer(player.id, updates)}
+                          onRemove={() => removePlayer(player.id)}
+                          onRebuy={() => { vibrate(40); playSound(SOUNDS.rebuy); }}
+                          locked={false}
+                        />
                       ))}
                     </div>
                   )}
