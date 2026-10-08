@@ -1,6 +1,25 @@
 # Progress
 
-## 2026-09-18 (latest)
+## 2026-10-08 (latest)
+- Settlement algorithm ported from TypeScript to Rust, compiled to WebAssembly
+  with wasm-pack; crate in `settle-wasm/`, generated bindings in
+  `lib/settle_wasm/` (committed, since the deploy has no Rust toolchain)
+- Algorithm unchanged and verified identical to the old TypeScript over 4009
+  generated games plus 8 malformed-input shapes; previous implementation kept
+  at `lib/settle.ts.bak` for diffing
+- Not a performance win — the JS/WASM boundary crossing costs more than the
+  algorithm itself, so the old TypeScript is roughly 5x faster at real table
+  sizes. Done as a Rust learning exercise, and recorded here so nobody
+  "optimises" it again by mistake
+- Supabase credentials moved out of `lib/supabase.ts` into
+  `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY`, so local
+  development and production can point at different projects
+- `supabase-setup.sql` brought back in line with the real table — it was
+  missing `title`, `password` and `hand_history` and the delete policy, so a
+  database created from it would have broken on arrival
+- Testing workflow written up in `.helper/testing.md`
+
+## 2026-09-18
 - Neo-brutalist homepage redesign — cream background (#F5F0E8), heavy black borders, hard offset shadows, ALL CAPS bold type
 - Suit color system: ♠ black, ♥ red, ♦ blue, ♣ green — used on buy-in buttons and CTA
 - CTA button color changes dynamically based on selected buy-in

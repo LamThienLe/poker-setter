@@ -27,6 +27,12 @@
 - [x] Push `railway` branch to GitHub
 - [x] Confirm Railway connected and auto-deploying
 
+## Phase 6 — Dev workflow ✅
+- [x] Supabase credentials in env vars instead of hardcoded
+- [x] `supabase-setup.sql` matching the real schema, re-runnable
+- [x] Separate test Supabase project for local development (see `.helper/testing.md`)
+- [x] Settlement algorithm in Rust/WASM (learning exercise, not a speedup)
+
 ## Nice-to-haves (future)
 - Player profile page — tap name in stats to see full session history
 - [x] Share game link — copy button on game page
