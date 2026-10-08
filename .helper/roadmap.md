@@ -2,6 +2,7 @@
 
 ## Phase 1 — Core UI ✅
 - Today's game page with buy-in amount selector (candies 🍭)
+- Game creation with a 6-character code; realtime sync via Supabase
 - Fixed player name dropdown (AJ, Antoine, Damien, Dani, Elliot, Gaby, Jack, Kevin, Lam, Leon, Nikita, Pascal, Remi, Ronan, Tarek)
 - Add players dynamically as they join the table
 - Per-player: rebuy counter (+/- buttons), final chip count input
@@ -23,11 +24,18 @@
 - Delete session button (trash icon) with Supabase RLS delete policy
 - Stats link from settled game view
 
-## Phase 5 — Deploy ✅
+## Phase 5 — Sharing, validation & icons ✅
+- [x] QR code for game link sharing
+- [x] Chip count validation — warn before GG if total 🍭 ≠ total buy-ins
+- [x] Settled game view — read-only post-GG screen showing who pays whom in 🍭
+- [x] Replaced emoji with Heroicons throughout UI
+- [x] Live pot tracker — chip buttons with undo/clear, synced via Realtime
+
+## Phase 6 — Deploy ✅
 - [x] Push `railway` branch to GitHub
 - [x] Confirm Railway connected and auto-deploying
 
-## Phase 6 — Dev workflow ✅
+## Phase 7 — Dev workflow ✅
 - [x] Supabase credentials in env vars instead of hardcoded
 - [x] `supabase-setup.sql` matching the real schema, re-runnable
 - [x] Separate test Supabase project for local development (see `.helper/testing.md`)
