@@ -38,7 +38,7 @@
 ## Phase 7 — Dev workflow ✅
 - [x] Supabase credentials in env vars instead of hardcoded
 - [x] `supabase-setup.sql` matching the real schema, re-runnable
-- [x] Separate test Supabase project for local development (see `.helper/testing.md`)
+- [ ] Separate test Supabase project for local development — groundwork done, project not created yet (see `.helper/testing.md`)
 - [x] Settlement algorithm in Rust/WASM (learning exercise, not a speedup)
 
 ## Nice-to-haves (future)

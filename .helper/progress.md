@@ -18,6 +18,14 @@
   missing `title`, `password` and `hand_history` and the delete policy, so a
   database created from it would have broken on arrival
 - Testing workflow written up in `.helper/testing.md`
+- `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` set in the
+  Railway service variables; deployed, build green, and GG verified on the live
+  app, so the Rust/WASM settlement is confirmed working in production
+- Merged the duplicate `helper/` directory into `.helper/` and deleted it. It
+  was not a stale copy — it held a newer 2026-09-29 entry plus the Heroicons,
+  QR sharing, chip imbalance and settled-view history that `.helper/` lacked
+- Still outstanding: create the test Supabase project. Until then `.env.local`
+  holds production credentials and `npm run dev` writes to real games
 
 ## 2026-09-29
 - Live pot tracker on game screen: 6 chip buttons (1/5/10/25/50/100), undo, clear — syncs via Supabase Realtime
