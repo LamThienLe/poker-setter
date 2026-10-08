@@ -1,0 +1,19 @@
+{
+  "name": "settle-wasm",
+  "type": "module",
+  "description": "Minimum-transfer poker settlement algorithm, compiled to WebAssembly.",
+  "version": "0.1.0",
+  "license": "MIT",
+  "files": [
+    "settle_wasm_bg.wasm",
+    "settle_wasm.js",
+    "settle_wasm_bg.js",
+    "settle_wasm.d.ts"
+  ],
+  "main": "settle_wasm.js",
+  "types": "settle_wasm.d.ts",
+  "sideEffects": [
+    "./settle_wasm.js",
+    "./snippets/*"
+  ]
+}

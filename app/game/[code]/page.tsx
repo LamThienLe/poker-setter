@@ -6,7 +6,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { supabase } from "@/lib/supabase";
 import { type GameRow } from "@/lib/game";
 import { type Player, type KnownPlayer } from "@/lib/types";
-import { calculateSettlements } from "@/lib/settle";
+import { calculateSettlements } from "@/lib/settle_wasm/settle_wasm";
 import BottomNav from "@/components/BottomNav";
 import {
   CheckCircleIcon,
