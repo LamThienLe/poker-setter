@@ -17,6 +17,7 @@ create table if not exists games (
 -- so an older database can be brought up to date by re-running this file.
 alter table games add column if not exists title    text;
 alter table games add column if not exists password text;
+alter table games add column if not exists is_test  boolean not null default false;
 
 -- Enable RLS
 alter table games enable row level security;

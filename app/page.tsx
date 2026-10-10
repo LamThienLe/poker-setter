@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { BUY_IN_OPTIONS } from "@/lib/types";
 import { supabase } from "@/lib/supabase";
-import { generateGameCode, type GameRow } from "@/lib/game";
+import { generateGameCode, isTestEnvironment, type GameRow } from "@/lib/game";
 import { ArrowRightCircleIcon, LockClosedIcon } from "@heroicons/react/24/outline";
 import BottomNav from "@/components/BottomNav";
 
@@ -85,6 +85,7 @@ export default function Home() {
       .from("games")
       .select("*")
       .eq("settled", false)
+      .eq("is_test", isTestEnvironment())
       .order("created_at", { ascending: false })
       .then(({ data }) => {
         setActiveGames((data as GameRow[]) ?? []);
@@ -104,6 +105,7 @@ export default function Home() {
       settled: false,
       password: password.trim() || null,
       title: finalTitle,
+      is_test: isTestEnvironment(),
     });
     router.push(`/game/${code}`);
   }

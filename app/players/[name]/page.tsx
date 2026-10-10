@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { type GameRow } from "@/lib/game";
+import { isTestEnvironment, type GameRow } from "@/lib/game";
 import { type Player } from "@/lib/types";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 
@@ -64,6 +64,7 @@ export default function PlayerProfilePage() {
       .from("games")
       .select("*")
       .eq("settled", true)
+      .eq("is_test", isTestEnvironment())
       .order("created_at", { ascending: false })
       .then(({ data }) => {
         const games = (data as GameRow[]) ?? [];

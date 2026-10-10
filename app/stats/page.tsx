@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { type GameRow } from "@/lib/game";
+import { isTestEnvironment, type GameRow } from "@/lib/game";
 import { type Player } from "@/lib/types";
 import BottomNav from "@/components/BottomNav";
 import { CumulativeChart, RadarChart } from "@/components/StatCharts";
@@ -95,6 +95,7 @@ export default function StatsPage() {
       .from("games")
       .select("*")
       .eq("settled", true)
+      .eq("is_test", isTestEnvironment())
       .order("created_at", { ascending: false })
       .then(({ data }) => {
         setAllGames((data as GameRow[]) ?? []);
