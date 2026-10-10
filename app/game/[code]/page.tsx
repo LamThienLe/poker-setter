@@ -117,8 +117,6 @@ async function fireConfetti(topCount: number) {
 
 function PlayerRow({
   player,
-  usedNames,
-  availableNames,
   onUpdate,
   onRemove,
   onRebuy,
@@ -126,42 +124,20 @@ function PlayerRow({
   isMine,
 }: {
   player: Player;
-  usedNames: Set<string>;
-  availableNames: string[];
   onUpdate: (updates: Partial<Player>) => void;
   onRemove: () => void;
   onRebuy: () => void;
   locked: boolean;
   isMine: boolean;
 }) {
-  const selectableNames = availableNames.filter(
-    (name) => name === player.name || !usedNames.has(name)
-  );
-  const isGuest = !availableNames.includes(player.name);
   const controlsDisabled = locked || !isMine;
 
   return (
     <div className="py-2 border-b-2 border-black last:border-b-0">
       <div className="flex items-center justify-between gap-2 mb-1.5">
-        {isGuest ? (
-          <div className="flex-1 min-w-0 text-black py-1 text-sm font-black uppercase truncate" title={player.name}>
-            {player.name}
-          </div>
-        ) : (
-          <select
-            value={player.name}
-            disabled={controlsDisabled}
-            onChange={(e) => onUpdate({ name: e.target.value })}
-            className="flex-1 min-w-0 border border-black text-black px-2 py-1.5 text-sm font-black uppercase disabled:opacity-60 disabled:cursor-not-allowed"
-            style={{ backgroundColor: BG }}
-          >
-            {selectableNames.map((name) => (
-              <option key={name} value={name}>
-                {name}
-              </option>
-            ))}
-          </select>
-        )}
+        <div className="flex-1 min-w-0 text-black py-1 text-sm font-black uppercase truncate" title={player.name}>
+          {player.name}
+        </div>
 
         {!locked && (
           <button
@@ -868,8 +844,6 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
                         <PlayerRow
                           key={player.id}
                           player={player}
-                          usedNames={usedNames}
-                          availableNames={knownPlayers}
                           onUpdate={(updates) => updatePlayer(player.id, updates)}
                           onRemove={() => removePlayer(player.id)}
                           onRebuy={() => { vibrate(40); playSound(SOUNDS.rebuy); }}
@@ -891,8 +865,6 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
                         <PlayerRow
                           key={player.id}
                           player={player}
-                          usedNames={usedNames}
-                          availableNames={knownPlayers}
                           onUpdate={(updates) => updatePlayer(player.id, updates)}
                           onRemove={() => removePlayer(player.id)}
                           onRebuy={() => { vibrate(40); playSound(SOUNDS.rebuy); }}
