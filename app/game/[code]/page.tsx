@@ -141,75 +141,77 @@ function PlayerRow({
   const controlsDisabled = locked || !isMine;
 
   return (
-    <div className="flex items-center gap-2 py-2 border-b-2 border-black last:border-b-0">
-      {isGuest ? (
-        <div className="w-16 shrink-0 text-black px-1 py-2 text-xs font-black uppercase truncate" title={player.name}>
-          {player.name}
-        </div>
-      ) : (
-        <select
-          value={player.name}
-          disabled={controlsDisabled}
-          onChange={(e) => onUpdate({ name: e.target.value })}
-          className="w-16 shrink-0 border border-black text-black px-1 py-2 text-xs font-black uppercase disabled:opacity-60 disabled:cursor-not-allowed"
-          style={{ backgroundColor: BG }}
-        >
-          {selectableNames.map((name) => (
-            <option key={name} value={name}>
-              {name}
-            </option>
-          ))}
-        </select>
-      )}
+    <div className="py-2 border-b-2 border-black last:border-b-0">
+      <div className="flex items-center justify-between gap-2 mb-1.5">
+        {isGuest ? (
+          <div className="flex-1 min-w-0 text-black py-1 text-sm font-black uppercase truncate" title={player.name}>
+            {player.name}
+          </div>
+        ) : (
+          <select
+            value={player.name}
+            disabled={controlsDisabled}
+            onChange={(e) => onUpdate({ name: e.target.value })}
+            className="flex-1 min-w-0 border border-black text-black px-2 py-1.5 text-sm font-black uppercase disabled:opacity-60 disabled:cursor-not-allowed"
+            style={{ backgroundColor: BG }}
+          >
+            {selectableNames.map((name) => (
+              <option key={name} value={name}>
+                {name}
+              </option>
+            ))}
+          </select>
+        )}
 
-      <div className="flex items-center shrink-0 gap-1">
-        <button
-          disabled={controlsDisabled || player.buyIns <= 1}
-          onClick={() => onUpdate({ buyIns: player.buyIns - 1 })}
-          className="flex items-center justify-center border-2 border-black text-black text-base font-black disabled:opacity-30 active:translate-x-0.5 active:translate-y-0.5 transition-transform touch-manipulation"
-          style={{ minWidth: 36, minHeight: 36, width: 32, height: 32, backgroundColor: BG, boxShadow: "2px 2px 0 #000" }}
-          {...pressHandlers("#f87171")}
-        >
-          −
-        </button>
-        <span className="w-4 text-center text-xs font-black tabular-nums text-black">
-          {player.buyIns}
-        </span>
-        <button
-          disabled={controlsDisabled}
-          onClick={() => { onUpdate({ buyIns: player.buyIns + 1 }); onRebuy(); }}
-          className="flex items-center justify-center border-2 border-black text-black text-base font-black disabled:opacity-30 active:translate-x-0.5 active:translate-y-0.5 transition-transform touch-manipulation"
-          style={{ minWidth: 36, minHeight: 36, width: 32, height: 32, backgroundColor: BG, boxShadow: "2px 2px 0 #000" }}
-          {...pressHandlers("#34d399")}
-        >
-          +
-        </button>
+        {!locked && (
+          <button
+            onClick={onRemove}
+            className="flex items-center justify-center border-2 border-black text-black/40 text-base leading-none shrink-0 touch-manipulation font-black active:translate-x-0.5 active:translate-y-0.5 transition-transform"
+            style={{ minWidth: 36, minHeight: 36, width: 28, height: 28, backgroundColor: BG, boxShadow: "2px 2px 0 #000" }}
+            {...pressHandlers("#f87171")}
+          >
+            ×
+          </button>
+        )}
       </div>
 
-      <input
-        type="number"
-        inputMode="numeric"
-        pattern="[0-9]*"
-        disabled={controlsDisabled}
-        value={player.chips}
-        onChange={(e) => onUpdate({ chips: e.target.value })}
-        placeholder="chips"
-        className="flex-1 min-w-0 border border-black text-black px-2 py-2 text-sm font-black placeholder:text-black/30 disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus:ring-1 focus:ring-black"
-        style={{ backgroundColor: BG }}
-      />
+      <div className="flex items-center gap-2">
+        <div className="flex items-center shrink-0 gap-1">
+          <button
+            disabled={controlsDisabled || player.buyIns <= 1}
+            onClick={() => onUpdate({ buyIns: player.buyIns - 1 })}
+            className="flex items-center justify-center border-2 border-black text-black text-base font-black disabled:opacity-30 active:translate-x-0.5 active:translate-y-0.5 transition-transform touch-manipulation"
+            style={{ minWidth: 36, minHeight: 36, width: 32, height: 32, backgroundColor: BG, boxShadow: "2px 2px 0 #000" }}
+            {...pressHandlers("#f87171")}
+          >
+            −
+          </button>
+          <span className="w-4 text-center text-xs font-black tabular-nums text-black">
+            {player.buyIns}
+          </span>
+          <button
+            disabled={controlsDisabled}
+            onClick={() => { onUpdate({ buyIns: player.buyIns + 1 }); onRebuy(); }}
+            className="flex items-center justify-center border-2 border-black text-black text-base font-black disabled:opacity-30 active:translate-x-0.5 active:translate-y-0.5 transition-transform touch-manipulation"
+            style={{ minWidth: 36, minHeight: 36, width: 32, height: 32, backgroundColor: BG, boxShadow: "2px 2px 0 #000" }}
+            {...pressHandlers("#34d399")}
+          >
+            +
+          </button>
+        </div>
 
-      {!locked && (
-        <button
-          onClick={onRemove}
-          className="flex items-center justify-center border-2 border-black text-black/40 text-base leading-none shrink-0 touch-manipulation font-black active:translate-x-0.5 active:translate-y-0.5 transition-transform"
-          style={{ minWidth: 36, minHeight: 36, width: 28, height: 28, backgroundColor: BG, boxShadow: "2px 2px 0 #000" }}
-          {...pressHandlers("#f87171")}
-        >
-          ×
-        </button>
-      )}
-
-      {locked && <div style={{ minWidth: 44, width: 28 }} className="shrink-0" />}
+        <input
+          type="number"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          disabled={controlsDisabled}
+          value={player.chips}
+          onChange={(e) => onUpdate({ chips: e.target.value })}
+          placeholder="chips"
+          className="flex-1 min-w-0 border border-black text-black px-2 py-2 text-sm font-black placeholder:text-black/30 disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus:ring-1 focus:ring-black"
+          style={{ backgroundColor: BG }}
+        />
+      </div>
     </div>
   );
 }
