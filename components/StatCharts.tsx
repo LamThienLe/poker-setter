@@ -6,6 +6,8 @@ import { type CumulativeSeries, type RadarAxis } from "@/lib/stats";
 const SERIES_COLORS = [
   "#ef4444", "#2563eb", "#22c55e", "#a855f7", "#f59e0b",
   "#06b6d4", "#ec4899", "#84cc16", "#f97316", "#6366f1",
+  "#14b8a6", "#d946ef", "#65a30d", "#0ea5e9", "#b91c1c",
+  "#78350f",
 ];
 
 
