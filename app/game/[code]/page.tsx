@@ -21,8 +21,6 @@ import {
 
 
 const BG = "#F5F0E8";
-const CHIP_DENOMINATIONS = [1, 5, 10, 25, 50, 100];
-const CHIP_COLORS = ["#fbbf24", "#f87171", "#34d399", "#60a5fa", "#a78bfa", "#fb923c"];
 
 function pressHandlers(flashColor: string, shadow = "2px 2px 0 #000", restoreColor = BG) {
   return {
@@ -376,11 +374,7 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
   const [addingName, setAddingName] = useState<string>("");
   const [hasCopiedLink, setHasCopiedLink] = useState(false);
   const [showQR, setShowQR] = useState(false);
-  const [activeTab, setActiveTab] = useState<0 | 1>(0);
-  const touchStartX = useRef<number | null>(null);
   const pendingWrite = useRef(false);
-  const potFlushTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const pendingPot = useRef<{ pot: number; history: number[] } | null>(null);
   const copyResetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const passwordRef = useRef<string | null>(null);
 
@@ -464,13 +458,6 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
       .eq("code", code);
   }
 
-  async function pushGame(updates: Partial<GameRow>) {
-    if (!game) return;
-    pendingWrite.current = true;
-    setGame((prev) => prev ? { ...prev, ...updates } : prev);
-    await supabase.from("games").update(updates).eq("code", code);
-  }
-
   function addPlayer() {
     if (!game || !addingName) return;
     const usedNames = new Set(game.players.map((p) => p.name));
@@ -499,7 +486,6 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
     if (!game) return;
     vibrate([50, 30, 50]);
     playSound(SOUNDS.gg);
-    setActiveTab(1);
     setPageState("preview");
   }
 
@@ -557,51 +543,6 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
     router.push("/");
   }
 
-  function addChipToPot(chip: number) {
-    if (!game) return;
-    vibrate(20);
-    const base = pendingPot.current ?? { pot: game.pot ?? 0, history: game.pot_history ?? [] };
-    const newPot = base.pot + chip;
-    const newHistory = [...base.history, chip];
-    pendingPot.current = { pot: newPot, history: newHistory };
-    pendingWrite.current = true;
-    setGame((prev) => prev ? { ...prev, pot: newPot, pot_history: newHistory } : prev);
-    if (potFlushTimer.current) clearTimeout(potFlushTimer.current);
-    potFlushTimer.current = setTimeout(async () => {
-      if (!pendingPot.current) return;
-      const { pot, history } = pendingPot.current;
-      pendingPot.current = null;
-      await supabase.from("games").update({ pot, pot_history: history }).eq("code", code);
-    }, 600);
-  }
-
-  async function undoLastChip() {
-    if (!game) return;
-    const history = game.pot_history ?? [];
-    if (history.length === 0) return;
-    vibrate(30);
-    const lastChip = history[history.length - 1];
-    const newHistory = history.slice(0, -1);
-    const newPot = (game.pot ?? 0) - lastChip;
-    await pushGame({ pot: newPot, pot_history: newHistory });
-  }
-
-  async function nextHand() {
-    if (!game) return;
-    const current = game.pot ?? 0;
-    if (current === 0) return;
-    vibrate([30, 20, 30]);
-    const newHandHistory = [...(game.hand_history ?? []), current];
-    await pushGame({ pot: 0, pot_history: [], hand_history: newHandHistory });
-  }
-
-  async function clearPot() {
-    if (!game) return;
-    if ((game.pot ?? 0) === 0) return;
-    vibrate([30, 20, 30]);
-    await pushGame({ pot: 0, pot_history: [] });
-  }
-
   if (pageState === "loading") {
     return (
       <main className="min-h-dvh flex items-center justify-center" style={{ backgroundColor: BG }}>
@@ -634,8 +575,6 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
 
   const usedNames = new Set(game.players.map((p) => p.name));
   const availableToAdd = knownPlayers.filter((n) => !usedNames.has(n));
-  const totalBuyIns = game.players.reduce((sum, p) => sum + p.buyIns, 0);
-  const totalPot = totalBuyIns * game.buy_in;
   const canSettle = game.players.length >= 2 && game.players.every((p) => p.chips !== "");
   const locked = pageState === "settled" || pageState === "preview";
 
@@ -680,111 +619,8 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
           </div>
         </div>
 
-        {/* Tab bar — only during active play */}
-        {pageState === "active" && (
-          <div className="flex mb-3 border-2 border-black" style={{ boxShadow: "3px 3px 0 #000" }}>
-            <button
-              onClick={() => setActiveTab(0)}
-              className="flex-1 py-2.5 text-xs font-black uppercase transition-colors touch-manipulation"
-              style={{
-                backgroundColor: activeTab === 0 ? "#000" : BG,
-                color: activeTab === 0 ? "#fff" : "#000",
-              }}
-            >
-              Pot
-            </button>
-            <button
-              onClick={() => setActiveTab(1)}
-              className="flex-1 py-2.5 text-xs font-black uppercase transition-colors touch-manipulation border-l-2 border-black"
-              style={{
-                backgroundColor: activeTab === 1 ? "#000" : BG,
-                color: activeTab === 1 ? "#fff" : "#000",
-              }}
-            >
-              Players {game.players.length > 0 ? `(${game.players.length})` : ""}
-            </button>
-          </div>
-        )}
-
-        {/* Swipeable content area */}
-        <div
-          className="mb-4"
-          onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
-          onTouchEnd={(e) => {
-            if (touchStartX.current === null || pageState !== "active") return;
-            const dx = e.changedTouches[0].clientX - touchStartX.current;
-            if (Math.abs(dx) > 50) setActiveTab(dx < 0 ? 1 : 0);
-            touchStartX.current = null;
-          }}
-        >
-          {/* Tab 0 — Pot tracker */}
-          {(pageState === "active" && activeTab === 0) && (
-            <div className="border-2 border-black px-4 py-3" style={{ boxShadow: "4px 4px 0 #000" }}>
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-xs font-black uppercase text-black/40 tracking-widest">
-                  Buy-ins: {totalPot.toLocaleString()} 🍭
-                </p>
-                <div className="flex gap-2">
-                  <button
-                    onClick={undoLastChip}
-                    disabled={(game.pot_history ?? []).length === 0}
-                    className="text-xs font-black uppercase border-2 border-black text-black px-2 py-1 disabled:opacity-30 active:translate-x-0.5 active:translate-y-0.5 transition-transform touch-manipulation"
-                    style={{ backgroundColor: BG, boxShadow: "2px 2px 0 #000" }}
-                    {...pressHandlers("#fbbf24")}
-                  >
-                    Undo
-                  </button>
-                  <button
-                    onClick={clearPot}
-                    disabled={(game.pot ?? 0) === 0}
-                    className="text-xs font-black uppercase border-2 border-black text-black px-2 py-1 disabled:opacity-30 active:translate-x-0.5 active:translate-y-0.5 transition-transform touch-manipulation"
-                    style={{ backgroundColor: BG, boxShadow: "2px 2px 0 #000" }}
-                    {...pressHandlers("#f87171")}
-                  >
-                    Clear
-                  </button>
-                  <button
-                    onClick={nextHand}
-                    disabled={(game.pot ?? 0) === 0}
-                    className="text-xs font-black uppercase border-2 border-black text-black px-2 py-1 disabled:opacity-30 active:translate-x-0.5 active:translate-y-0.5 transition-transform touch-manipulation"
-                    style={{ backgroundColor: "#22c55e", boxShadow: "2px 2px 0 #000" }}
-                    {...pressHandlers("#22c55e", "2px 2px 0 #000", "#22c55e")}
-                  >
-                    Next
-                  </button>
-                </div>
-              </div>
-              <p className="text-4xl font-black tabular-nums text-black mb-4">{(game.pot ?? 0).toLocaleString()} 🍭</p>
-              <div className="grid grid-cols-6 gap-3 mb-4">
-                {CHIP_DENOMINATIONS.map((chip, i) => (
-                  <button
-                    key={chip}
-                    onClick={() => addChipToPot(chip)}
-                    className="py-4 border-2 border-black text-black text-sm font-black touch-manipulation active:translate-x-1 active:translate-y-1 transition-transform"
-                    style={{ backgroundColor: BG, boxShadow: "4px 4px 0 #000" }}
-                    {...pressHandlers(CHIP_COLORS[i], "4px 4px 0 #000")}
-                  >
-                    {chip}
-                  </button>
-                ))}
-              </div>
-              {(game.hand_history ?? []).length > 0 && (
-                <div className="border-t-2 border-black pt-3">
-                  <p className="text-xs font-black uppercase text-black/40 mb-2 tracking-widest">Hands played</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {(game.hand_history ?? []).map((pot, i) => (
-                      <span key={i} className="text-xs font-black tabular-nums border border-black px-2 py-1 text-black" style={{ backgroundColor: BG }}>
-                        #{i + 1} · {pot.toLocaleString()}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Tab 1 — Players / rebuys (active) or full rows (preview/settled) */}
-          {(pageState !== "active" || activeTab === 1) && (
+        {/* Players / rebuys (active) or full rows (preview/settled) */}
+        <div className="mb-4">
             <>
               {/* Active: big rebuy buttons */}
               {pageState === "active" && (
@@ -859,7 +695,6 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
                 </>
               )}
             </>
-          )}
         </div>
 
         {(pageState === "preview" || pageState === "settled") && (

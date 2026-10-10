@@ -8,9 +8,6 @@ export interface GameRow {
   created_at: string;
   password: string | null;
   title: string | null;
-  pot: number | null;
-  pot_history: number[] | null;
-  hand_history: number[] | null;
 }
 
 export function generateGameCode(): string {
