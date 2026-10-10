@@ -160,7 +160,7 @@ export default function StatsPage() {
           {awards.length > 0 && (
             <section>
               <SectionLabel>Best of</SectionLabel>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3">
                 {awards.map((award) => (
                   <div key={award.key} className="border-2 border-black p-3" style={{ backgroundColor: BG, boxShadow: "4px 4px 0 #000" }}>
                     <p className="text-xs font-black uppercase text-black mb-2">{award.title}</p>
@@ -264,7 +264,7 @@ export default function StatsPage() {
                 <select
                   value={nameA}
                   onChange={(e) => setNameA(e.target.value)}
-                  className="border-2 border-black px-3 py-2.5 text-sm font-black uppercase focus:outline-none"
+                  className="border-2 border-black text-black px-3 py-2.5 text-sm font-black uppercase focus:outline-none"
                   style={{ backgroundColor: BG, boxShadow: "3px 3px 0 #000" }}
                 >
                   {names.map((n) => <option key={n} value={n}>{n}</option>)}
@@ -272,7 +272,7 @@ export default function StatsPage() {
                 <select
                   value={nameB}
                   onChange={(e) => setNameB(e.target.value)}
-                  className="border-2 border-black px-3 py-2.5 text-sm font-black uppercase focus:outline-none"
+                  className="border-2 border-black text-black px-3 py-2.5 text-sm font-black uppercase focus:outline-none"
                   style={{ backgroundColor: BG, boxShadow: "3px 3px 0 #000" }}
                 >
                   {names.map((n) => <option key={n} value={n}>{n}</option>)}

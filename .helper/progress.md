@@ -1,6 +1,19 @@
 # Progress
 
-## 2026-10-10 (latest)
+## 2026-10-10b (latest)
+- Per-device identity claim: first visit to an active game shows a "Who are
+  you?" screen (claim an existing seat, join from the known list, or as a
+  guest); choice is stored in `localStorage` per game code, no accounts
+- `PlayerRow` controls (rename, rebuy +/-, chip input) are disabled unless
+  the row belongs to the claimed identity; remove button stays open to anyone
+- Header shows "Playing as X · switch" to re-open the identity screen
+- `games.is_test` column + `NEXT_PUBLIC_IS_TEST_ENV` filter added so fake
+  data only shows on the service that has that env var set, same database
+- Stats page: fixed white-on-white 1v1 player dropdowns (missing `text-black`)
+  and changed the "Best of" awards grid from 2 columns to 1 so longer
+  nicknames aren't truncated
+
+## 2026-10-10
 - Guest free-text add: a second input next to the known-name picker lets
   anyone join a game with a typed name, no `known_players` row needed
 - `PlayerRow` now shows a plain label (not a `<select>`) for any name not in

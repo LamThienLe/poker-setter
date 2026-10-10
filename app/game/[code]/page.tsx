@@ -123,6 +123,7 @@ function PlayerRow({
   onRemove,
   onRebuy,
   locked,
+  isMine,
 }: {
   player: Player;
   usedNames: Set<string>;
@@ -131,11 +132,13 @@ function PlayerRow({
   onRemove: () => void;
   onRebuy: () => void;
   locked: boolean;
+  isMine: boolean;
 }) {
   const selectableNames = availableNames.filter(
     (name) => name === player.name || !usedNames.has(name)
   );
   const isGuest = !availableNames.includes(player.name);
+  const controlsDisabled = locked || !isMine;
 
   return (
     <div className="flex items-center gap-2 py-2 border-b-2 border-black last:border-b-0">
@@ -146,7 +149,7 @@ function PlayerRow({
       ) : (
         <select
           value={player.name}
-          disabled={locked}
+          disabled={controlsDisabled}
           onChange={(e) => onUpdate({ name: e.target.value })}
           className="w-16 shrink-0 border border-black text-black px-1 py-2 text-xs font-black uppercase disabled:opacity-60 disabled:cursor-not-allowed"
           style={{ backgroundColor: BG }}
@@ -161,7 +164,7 @@ function PlayerRow({
 
       <div className="flex items-center shrink-0 gap-1">
         <button
-          disabled={locked || player.buyIns <= 1}
+          disabled={controlsDisabled || player.buyIns <= 1}
           onClick={() => onUpdate({ buyIns: player.buyIns - 1 })}
           className="flex items-center justify-center border-2 border-black text-black text-base font-black disabled:opacity-30 active:translate-x-0.5 active:translate-y-0.5 transition-transform touch-manipulation"
           style={{ minWidth: 36, minHeight: 36, width: 32, height: 32, backgroundColor: BG, boxShadow: "2px 2px 0 #000" }}
@@ -173,7 +176,7 @@ function PlayerRow({
           {player.buyIns}
         </span>
         <button
-          disabled={locked}
+          disabled={controlsDisabled}
           onClick={() => { onUpdate({ buyIns: player.buyIns + 1 }); onRebuy(); }}
           className="flex items-center justify-center border-2 border-black text-black text-base font-black disabled:opacity-30 active:translate-x-0.5 active:translate-y-0.5 transition-transform touch-manipulation"
           style={{ minWidth: 36, minHeight: 36, width: 32, height: 32, backgroundColor: BG, boxShadow: "2px 2px 0 #000" }}
@@ -187,7 +190,7 @@ function PlayerRow({
         type="number"
         inputMode="numeric"
         pattern="[0-9]*"
-        disabled={locked}
+        disabled={controlsDisabled}
         value={player.chips}
         onChange={(e) => onUpdate({ chips: e.target.value })}
         placeholder="chips"
@@ -354,6 +357,101 @@ function PasswordGate({ onUnlock }: { onUnlock: (input: string) => void }) {
 }
 
 
+function IdentityGate({
+  existingPlayers,
+  knownOptions,
+  onClaimExisting,
+  onAddKnown,
+  onAddGuest,
+}: {
+  existingPlayers: string[];
+  knownOptions: string[];
+  onClaimExisting: (name: string) => void;
+  onAddKnown: (name: string) => void;
+  onAddGuest: (name: string) => void;
+}) {
+  const [pickedKnown, setPickedKnown] = useState(knownOptions[0] ?? "");
+  const [guestName, setGuestName] = useState("");
+
+  return (
+    <main className="min-h-dvh flex flex-col items-center justify-center px-6 gap-6" style={{ backgroundColor: BG }}>
+      <div className="text-center">
+        <h2 className="text-2xl font-black uppercase text-black">Who are you?</h2>
+        <p className="text-black/50 text-sm mt-1 font-bold">Pick your name to join this game</p>
+      </div>
+
+      <div className="w-full max-w-xs space-y-5">
+        {existingPlayers.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-xs font-bold uppercase text-black/50">Already at the table</p>
+            <div className="flex flex-wrap gap-2">
+              {existingPlayers.map((name) => (
+                <button
+                  key={name}
+                  onClick={() => onClaimExisting(name)}
+                  className="border-2 border-black text-black px-3 py-2 text-sm font-black uppercase active:translate-x-0.5 active:translate-y-0.5 transition-transform"
+                  style={{ backgroundColor: BG, boxShadow: "2px 2px 0 #000" }}
+                >
+                  {name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {knownOptions.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-xs font-bold uppercase text-black/50">Not at the table yet</p>
+            <div className="flex items-center gap-2">
+              <select
+                value={pickedKnown}
+                onChange={(e) => setPickedKnown(e.target.value)}
+                className="flex-1 min-w-0 border-2 border-black text-black px-3 py-3 text-sm font-black uppercase focus:outline-none"
+                style={{ backgroundColor: BG }}
+              >
+                {knownOptions.map((name) => (
+                  <option key={name} value={name}>{name}</option>
+                ))}
+              </select>
+              <button
+                onClick={() => onAddKnown(pickedKnown)}
+                className="px-4 h-11 flex items-center justify-center border-2 border-black text-white text-sm font-black uppercase active:translate-x-0.5 active:translate-y-0.5 transition-transform shrink-0"
+                style={{ backgroundColor: "#22c55e", boxShadow: "2px 2px 0 #000" }}
+              >
+                Join
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div className="space-y-2">
+          <p className="text-xs font-bold uppercase text-black/50">Guest</p>
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={guestName}
+              onChange={(e) => setGuestName(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && guestName.trim() && onAddGuest(guestName.trim())}
+              placeholder="Guest name"
+              className="flex-1 min-w-0 border-2 border-black text-black px-3 py-3 text-sm font-bold placeholder:text-black/30 focus:outline-none"
+              style={{ backgroundColor: BG }}
+            />
+            <button
+              onClick={() => guestName.trim() && onAddGuest(guestName.trim())}
+              disabled={!guestName.trim()}
+              className="px-4 h-11 flex items-center justify-center border-2 border-black text-white text-sm font-black uppercase disabled:opacity-30 disabled:cursor-not-allowed active:translate-x-0.5 active:translate-y-0.5 transition-transform shrink-0"
+              style={{ backgroundColor: "#3b82f6", boxShadow: "2px 2px 0 #000" }}
+            >
+              Join
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+
 function buildShareText(game: GameRow): string {
   const title = game.title ?? `Game ${game.code}`;
   const netResults = game.players
@@ -382,6 +480,10 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
   const [guestName, setGuestName] = useState<string>("");
   const [hasCopiedLink, setHasCopiedLink] = useState(false);
   const [showQR, setShowQR] = useState(false);
+  const [myName, setMyName] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    return window.localStorage.getItem(`poker_identity_${code}`);
+  });
   const pendingWrite = useRef(false);
   const copyResetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const passwordRef = useRef<string | null>(null);
@@ -496,6 +598,48 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
     setGuestName("");
   }
 
+
+  function claimIdentity(name: string) {
+    window.localStorage.setItem(`poker_identity_${code}`, name);
+    setMyName(name);
+  }
+
+
+  function switchIdentity() {
+    window.localStorage.removeItem(`poker_identity_${code}`);
+    setMyName(null);
+  }
+
+
+  function addKnownAndClaim(name: string) {
+    if (!game || !name) return;
+    const usedNames = new Set(game.players.map((p) => p.name));
+    if (!usedNames.has(name)) {
+      const newPlayers = [
+        ...game.players,
+        { id: generateId(), name, buyIns: 1, chips: "", submitted: false },
+      ];
+      pushPlayers(newPlayers);
+    }
+    claimIdentity(name);
+  }
+
+
+  function addGuestAndClaim(name: string) {
+    if (!game) return;
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    const usedNames = new Set(game.players.map((p) => p.name.toLowerCase()));
+    if (!usedNames.has(trimmed.toLowerCase())) {
+      const newPlayers = [
+        ...game.players,
+        { id: generateId(), name: trimmed, buyIns: 1, chips: "", submitted: false },
+      ];
+      pushPlayers(newPlayers);
+    }
+    claimIdentity(trimmed);
+  }
+
   function updatePlayer(id: string, updates: Partial<Player>) {
     if (!game) return;
     pushPlayers(game.players.map((p) => p.id === id ? { ...p, ...updates } : p));
@@ -602,6 +746,18 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
   const canSettle = game.players.length >= 2 && game.players.every((p) => p.chips !== "");
   const locked = pageState === "settled" || pageState === "preview";
 
+  if (pageState === "active" && !myName) {
+    return (
+      <IdentityGate
+        existingPlayers={game.players.map((p) => p.name)}
+        knownOptions={availableToAdd}
+        onClaimExisting={claimIdentity}
+        onAddKnown={addKnownAndClaim}
+        onAddGuest={addGuestAndClaim}
+      />
+    );
+  }
+
   const gameUrl = typeof window !== "undefined" ? `${window.location.origin}/game/${code}` : "";
   const totalChipsOut = game.players.reduce((s, p) => s + Number(p.chips || 0), 0);
   const totalPotValue = game.players.reduce((s, p) => s + p.buyIns * game.buy_in, 0);
@@ -622,6 +778,11 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
               {game.buy_in} 🍭 · <span className="font-mono">{code}</span>
               {game.password && <LockClosedIcon className="inline w-3 h-3 ml-1" />}
             </p>
+            {myName && pageState === "active" && (
+              <button onClick={switchIdentity} className="text-xs text-black/40 font-bold underline mt-0.5">
+                Playing as {myName} · switch
+              </button>
+            )}
           </div>
           <div className="flex gap-2">
             <button
@@ -711,6 +872,7 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
                           onRemove={() => removePlayer(player.id)}
                           onRebuy={() => { vibrate(40); playSound(SOUNDS.rebuy); }}
                           locked={false}
+                          isMine={player.name === myName}
                         />
                       ))}
                     </div>
@@ -733,6 +895,7 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
                           onRemove={() => removePlayer(player.id)}
                           onRebuy={() => { vibrate(40); playSound(SOUNDS.rebuy); }}
                           locked={locked}
+                          isMine={player.name === myName}
                         />
                       ))}
                     </div>
