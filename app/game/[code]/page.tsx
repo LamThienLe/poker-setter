@@ -122,6 +122,7 @@ function PlayerRow({
   onRebuy,
   locked,
   isMine,
+  isAdmin,
 }: {
   player: Player;
   onUpdate: (updates: Partial<Player>) => void;
@@ -129,8 +130,9 @@ function PlayerRow({
   onRebuy: () => void;
   locked: boolean;
   isMine: boolean;
+  isAdmin: boolean;
 }) {
-  const controlsDisabled = locked || !isMine;
+  const controlsDisabled = locked || (!isMine && !isAdmin);
 
   return (
     <div className="py-2 border-b-2 border-black last:border-b-0">
@@ -723,6 +725,7 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
   const availableToAdd = knownPlayers.filter((n) => !usedNames.has(n));
   const canSettle = game.players.length >= 2 && game.players.every((p) => p.chips !== "");
   const locked = pageState === "settled" || pageState === "preview";
+  const isAdmin = myName === "Mister Lam";
 
   if (pageState === "active" && !myName) {
     return (
@@ -849,6 +852,7 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
                           onRebuy={() => { vibrate(40); playSound(SOUNDS.rebuy); }}
                           locked={false}
                           isMine={player.name === myName}
+                          isAdmin={isAdmin}
                         />
                       ))}
                     </div>
@@ -870,6 +874,7 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
                           onRebuy={() => { vibrate(40); playSound(SOUNDS.rebuy); }}
                           locked={locked}
                           isMine={player.name === myName}
+                          isAdmin={isAdmin}
                         />
                       ))}
                     </div>
