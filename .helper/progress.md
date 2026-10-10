@@ -1,6 +1,14 @@
 # Progress
 
-## 2026-10-08 (latest)
+## 2026-10-10 (latest)
+- Guest free-text add: a second input next to the known-name picker lets
+  anyone join a game with a typed name, no `known_players` row needed
+- `PlayerRow` now shows a plain label (not a `<select>`) for any name not in
+  the known list, since guest names have nowhere to rename to
+- `known_players` table updated to the group's voted nicknames (data-only
+  change via Supabase REST, no deploy needed for that part)
+
+## 2026-10-08
 - Settlement algorithm ported from TypeScript to Rust, compiled to WebAssembly
   with wasm-pack; crate in `settle-wasm/`, generated bindings in
   `lib/settle_wasm/` (committed, since the deploy has no Rust toolchain)
@@ -80,3 +88,9 @@
 - QR code sharing: tap QR icon in header to show a scannable game link modal; installed `qrcode.react`
 - Chip imbalance warning: amber notice above GG button when total 🍭 in ≠ out
 - Settled game view: settlement panel (transfers + net results) renders immediately after GG
+- Built stats pack into /stats as 3 tabs (Board / Season / 1v1), neo-brutalist style
+  - Board: added Best-of awards grid (win rate, per-game profit, avg rank, consistency), 3-session minimum
+  - Season: all-players cumulative-profit chart (dependency-free inline SVG)
+  - 1v1: player picker → head-to-head record, radar comparison, cumulative chart, overview cards
+  - New lib/stats.ts (derived math), components/StatCharts.tsx (SVG charts); no schema changes
+  - Pushed to railway → deploying

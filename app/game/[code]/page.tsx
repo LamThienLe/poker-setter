@@ -135,22 +135,29 @@ function PlayerRow({
   const selectableNames = availableNames.filter(
     (name) => name === player.name || !usedNames.has(name)
   );
+  const isGuest = !availableNames.includes(player.name);
 
   return (
     <div className="flex items-center gap-2 py-2 border-b-2 border-black last:border-b-0">
-      <select
-        value={player.name}
-        disabled={locked}
-        onChange={(e) => onUpdate({ name: e.target.value })}
-        className="w-16 shrink-0 border border-black text-black px-1 py-2 text-xs font-black uppercase disabled:opacity-60 disabled:cursor-not-allowed"
-        style={{ backgroundColor: BG }}
-      >
-        {selectableNames.map((name) => (
-          <option key={name} value={name}>
-            {name}
-          </option>
-        ))}
-      </select>
+      {isGuest ? (
+        <div className="w-16 shrink-0 text-black px-1 py-2 text-xs font-black uppercase truncate" title={player.name}>
+          {player.name}
+        </div>
+      ) : (
+        <select
+          value={player.name}
+          disabled={locked}
+          onChange={(e) => onUpdate({ name: e.target.value })}
+          className="w-16 shrink-0 border border-black text-black px-1 py-2 text-xs font-black uppercase disabled:opacity-60 disabled:cursor-not-allowed"
+          style={{ backgroundColor: BG }}
+        >
+          {selectableNames.map((name) => (
+            <option key={name} value={name}>
+              {name}
+            </option>
+          ))}
+        </select>
+      )}
 
       <div className="flex items-center shrink-0 gap-1">
         <button
@@ -372,6 +379,7 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
   const [game, setGame] = useState<GameRow | null>(null);
   const [knownPlayers, setKnownPlayers] = useState<string[]>([]);
   const [addingName, setAddingName] = useState<string>("");
+  const [guestName, setGuestName] = useState<string>("");
   const [hasCopiedLink, setHasCopiedLink] = useState(false);
   const [showQR, setShowQR] = useState(false);
   const pendingWrite = useRef(false);
@@ -470,6 +478,22 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
     pushPlayers(newPlayers);
     const remaining = knownPlayers.filter((n) => !usedNames.has(n) && n !== addingName);
     if (remaining.length > 0) setAddingName(remaining[0]);
+  }
+
+
+  function addGuest() {
+    if (!game) return;
+    const name = guestName.trim();
+    if (!name) return;
+    const usedNames = new Set(game.players.map((p) => p.name.toLowerCase()));
+    if (usedNames.has(name.toLowerCase())) return;
+    vibrate(30);
+    const newPlayers = [
+      ...game.players,
+      { id: generateId(), name, buyIns: 1, chips: "", submitted: false },
+    ];
+    pushPlayers(newPlayers);
+    setGuestName("");
   }
 
   function updatePlayer(id: string, updates: Partial<Player>) {
@@ -647,6 +671,27 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
                       </button>
                     </div>
                   )}
+
+                  <div className="border-2 border-black p-2 flex items-center gap-2 mb-3" style={{ boxShadow: "3px 3px 0 #000" }}>
+                    <input
+                      type="text"
+                      value={guestName}
+                      onChange={(e) => setGuestName(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && addGuest()}
+                      placeholder="Guest name"
+                      className="flex-1 min-w-0 border border-black text-black px-3 py-3 text-sm font-bold placeholder:text-black/30 focus:outline-none"
+                      style={{ backgroundColor: BG }}
+                    />
+                    <button
+                      onClick={addGuest}
+                      disabled={!guestName.trim()}
+                      className="px-4 h-11 flex items-center justify-center border-2 border-black text-white text-sm font-black uppercase disabled:opacity-30 disabled:cursor-not-allowed active:translate-x-0.5 active:translate-y-0.5 transition-transform touch-manipulation shrink-0"
+                      style={{ backgroundColor: "#3b82f6", boxShadow: "2px 2px 0 #000" }}
+                      {...pressHandlers("#3b82f6", "2px 2px 0 #000", "#3b82f6")}
+                    >
+                      Add
+                    </button>
+                  </div>
 
                   {game.players.length === 0 && (
                     <p className="text-center text-black/40 text-sm py-12 font-bold">
