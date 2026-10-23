@@ -1,6 +1,10 @@
 # Progress
 
-## 2026-10-10b (latest)
+## 2026-10-24 (latest)
+- Anyone in a game can now edit any player's rebuys and chips, not just
+  their own row (identity claim still used for "Playing as X")
+
+## 2026-10-10b
 - Per-device identity claim: first visit to an active game shows a "Who are
   you?" screen (claim an existing seat, join from the known list, or as a
   guest); choice is stored in `localStorage` per game code, no accounts
