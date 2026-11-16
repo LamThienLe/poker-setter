@@ -674,7 +674,7 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
   }
 
   async function copyGameLink() {
-    const gameUrl = `${window.location.origin}/join/${activeGroup.invite_code}?next=/game/${code}`;
+    const gameUrl = `${window.location.origin}/game/${code}`;
     try {
       await navigator.clipboard.writeText(gameUrl);
       setHasCopiedLink(true);
@@ -738,7 +738,7 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
     );
   }
 
-  const gameUrl = typeof window !== "undefined" ? `${window.location.origin}/join/${activeGroup.invite_code}?next=/game/${code}` : "";
+  const gameUrl = typeof window !== "undefined" ? `${window.location.origin}/game/${code}` : "";
   const totalChipsOut = game.players.reduce((s, p) => s + Number(p.chips || 0), 0);
   const totalPotValue = game.players.reduce((s, p) => s + p.buyIns * game.buy_in, 0);
   const chipsUnbalanced = canSettle && totalChipsOut !== totalPotValue;

@@ -1,6 +1,21 @@
 # Progress
 
-## 2026-11-16 (latest)
+## 2026-11-16b (latest)
+- Groups now use name + password instead of invite codes: opening the app on a
+  new device shows a dropdown of group names and a password box, or "Create one"
+- Passwords are bcrypt-hashed in `groups.password_hash` and checked inside the
+  `join_group` function; members can read a group's id and name, never the hash
+- `list_groups()` exposes group names (only) to any signed-in device, so the
+  dropdown works; the cost is that group names are not secret
+- Share link/QR is the plain `/game/<code>` again; a non-member opening it sees
+  the group screen first, then lands in the game
+- Removed the home-screen group bar and the `/join` route; "Leave <group>" is a
+  small link at the bottom of the Players page
+- Migration converts the previous invite code into the group's starting
+  password; change it with the update statement at the bottom of
+  `supabase-setup.sql`
+
+## 2026-11-16
 - Multi-group support: every game and known player belongs to a group, and
   row level security only exposes a group's rows to its members
 - Devices sign in anonymously (Supabase anonymous auth), then join a group by

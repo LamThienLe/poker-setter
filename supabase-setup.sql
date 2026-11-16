@@ -8,7 +8,7 @@
 -- Authentication -> Sign In / Providers -> "Allow anonymous sign-ins".
 --
 -- Access model: every row belongs to a group. A device signs in anonymously,
--- then joins a group by invite code. Row level security only lets a user touch
+-- then joins a group by name and password. Row level security only lets a user touch
 -- rows of groups they are a member of, so groups never see each other's data.
 
 create table if not exists games (
@@ -26,11 +26,13 @@ create table if not exists known_players (
   name         text not null
 );
 
+create extension if not exists pgcrypto with schema extensions;
+
 create table if not exists groups (
-  id           uuid primary key default gen_random_uuid(),
-  name         text not null,
-  invite_code  text not null unique,
-  created_at   timestamptz not null default now()
+  id             uuid primary key default gen_random_uuid(),
+  name           text not null,
+  password_hash  text,
+  created_at     timestamptz not null default now()
 );
 
 create table if not exists group_members (
@@ -52,21 +54,37 @@ create index if not exists games_group_id_idx         on games(group_id);
 create index if not exists known_players_group_id_idx on known_players(group_id);
 create index if not exists group_members_user_id_idx  on group_members(user_id);
 
--- Rows that predate groups all go into one starting group. Its invite code is
--- returned by the last statement of this file, so the existing crew can rejoin.
+-- An earlier version of this file used invite codes. Their value becomes the
+-- starting password so existing groups keep working; change it with the
+-- update statement in the notes at the bottom.
+alter table groups add column if not exists password_hash text;
+do $$
+begin
+  if exists (select 1 from information_schema.columns
+             where table_schema = 'public' and table_name = 'groups' and column_name = 'invite_code') then
+    execute 'update groups set password_hash = extensions.crypt(invite_code, extensions.gen_salt(''bf'')) where password_hash is null';
+    execute 'alter table groups drop column invite_code';
+  end if;
+end $$;
+
+-- Rows that predate groups all go into one starting group. Its temporary
+-- password is "changeme" (only reached on databases that never had invite codes).
 do $$
 declare
   legacy_group uuid;
 begin
   if exists (select 1 from games where group_id is null)
      or exists (select 1 from known_players where group_id is null) then
-    insert into groups (name, invite_code)
-    values ('Original crew', upper(substr(replace(gen_random_uuid()::text, '-', ''), 1, 10)))
+    insert into groups (name, password_hash)
+    values ('Original crew', extensions.crypt('changeme', extensions.gen_salt('bf')))
     returning id into legacy_group;
     update games         set group_id = legacy_group where group_id is null;
     update known_players set group_id = legacy_group where group_id is null;
   end if;
 end $$;
+
+alter table groups alter column password_hash set not null;
+create unique index if not exists groups_name_lower_idx on groups (lower(name));
 
 alter table games         alter column group_id set not null;
 alter table known_players alter column group_id set not null;
@@ -87,12 +105,26 @@ as $$
 $$;
 
 -- Creating and joining go through functions so a client can never insert a
--- membership row for a group it has not proven access to.
-create or replace function create_group(group_name text)
-returns groups
-language plpgsql
+-- membership row for a group it has not proven access to, and never reads the
+-- password hash.
+drop function if exists create_group(text);
+drop function if exists join_group(text);
+
+create or replace function list_groups()
+returns table (id uuid, name text)
+language sql
+stable
 security definer
 set search_path = public
+as $$
+  select id, name from groups order by lower(name);
+$$;
+
+create or replace function create_group(group_name text, group_password text)
+returns table (id uuid, name text)
+language plpgsql
+security definer
+set search_path = public, extensions
 as $$
 declare
   new_group groups;
@@ -103,19 +135,25 @@ begin
   if length(trim(group_name)) = 0 then
     raise exception 'group name is required';
   end if;
-  insert into groups (name, invite_code)
-  values (trim(group_name), upper(substr(replace(gen_random_uuid()::text, '-', ''), 1, 10)))
+  if length(group_password) < 4 then
+    raise exception 'password must be at least 4 characters';
+  end if;
+  if exists (select 1 from groups where lower(groups.name) = lower(trim(group_name))) then
+    raise exception 'a group with that name already exists';
+  end if;
+  insert into groups (name, password_hash)
+  values (trim(group_name), crypt(group_password, gen_salt('bf')))
   returning * into new_group;
   insert into group_members (group_id, user_id) values (new_group.id, auth.uid());
-  return new_group;
+  return query select new_group.id, new_group.name;
 end;
 $$;
 
-create or replace function join_group(code text)
-returns groups
+create or replace function join_group(target_group uuid, group_password text)
+returns table (id uuid, name text)
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
 declare
   target groups;
@@ -123,22 +161,24 @@ begin
   if auth.uid() is null then
     raise exception 'not signed in';
   end if;
-  select * into target from groups where invite_code = upper(trim(code));
-  if not found then
-    raise exception 'invalid invite code';
+  select * into target from groups where groups.id = target_group;
+  if not found or target.password_hash <> crypt(group_password, target.password_hash) then
+    raise exception 'wrong password';
   end if;
   insert into group_members (group_id, user_id)
   values (target.id, auth.uid())
   on conflict do nothing;
-  return target;
+  return query select target.id, target.name;
 end;
 $$;
 
-revoke all on function create_group(text) from public, anon;
-revoke all on function join_group(text)   from public, anon;
-grant execute on function create_group(text) to authenticated;
-grant execute on function join_group(text)   to authenticated;
-grant execute on function is_group_member(uuid) to authenticated;
+revoke all on function list_groups()          from public, anon;
+revoke all on function create_group(text, text) from public, anon;
+revoke all on function join_group(uuid, text)   from public, anon;
+grant execute on function list_groups()            to authenticated;
+grant execute on function create_group(text, text) to authenticated;
+grant execute on function join_group(uuid, text)   to authenticated;
+grant execute on function is_group_member(uuid)    to authenticated;
 
 -- Replace whatever policies exist (including the old fully open ones).
 do $$
@@ -171,6 +211,10 @@ create policy "members delete" on known_players for delete to authenticated usin
 
 create policy "members read" on groups for select to authenticated using (is_group_member(id));
 
+-- Members can read a group's id and name, never its password hash.
+revoke select on groups from authenticated;
+grant select (id, name, created_at) on groups to authenticated;
+
 create policy "read own membership"  on group_members for select to authenticated using (user_id = auth.uid());
 create policy "leave own membership" on group_members for delete to authenticated using (user_id = auth.uid());
 
@@ -186,5 +230,7 @@ begin
   end if;
 end $$;
 
--- The starting group's invite code, if this run created one.
-select name, invite_code from groups order by created_at limit 5;
+-- To set or change a group's password, run this in the SQL editor:
+--   update groups set password_hash = extensions.crypt('NEW PASSWORD', extensions.gen_salt('bf'))
+--   where name = 'Original crew';
+select name from groups order by created_at;
