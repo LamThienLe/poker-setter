@@ -176,9 +176,15 @@ create policy "leave own membership" on group_members for delete to authenticate
 
 -- Realtime: powers live sync of a game across everyone's phones. Realtime
 -- applies the policies above using each subscriber's login.
--- Errors with "table is already member of publication" on a re-run, which is
--- harmless and can be ignored.
-alter publication supabase_realtime add table games;
+do $$
+begin
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'games'
+  ) then
+    alter publication supabase_realtime add table games;
+  end if;
+end $$;
 
 -- The starting group's invite code, if this run created one.
 select name, invite_code from groups order by created_at limit 5;
