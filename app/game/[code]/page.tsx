@@ -8,6 +8,7 @@ import { type GameRow } from "@/lib/game";
 import { type Player, type KnownPlayer } from "@/lib/types";
 import { calculateSettlements } from "@/lib/settle_wasm/settle_wasm";
 import BottomNav from "@/components/BottomNav";
+import { useActiveGroup } from "@/lib/groups";
 import {
   CheckCircleIcon,
   LinkIcon,
@@ -449,6 +450,7 @@ function buildShareText(game: GameRow): string {
 export default function GamePage({ params }: { params: Promise<{ code: string }> }) {
   const { code } = use(params);
   const router = useRouter();
+  const activeGroup = useActiveGroup();
   const [pageState, setPageState] = useState<"loading" | "password" | "not-found" | "active" | "preview" | "settled">("loading");
   const [game, setGame] = useState<GameRow | null>(null);
   const [knownPlayers, setKnownPlayers] = useState<string[]>([]);
@@ -473,18 +475,20 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
     supabase
       .from("known_players")
       .select("name")
+      .eq("group_id", activeGroup.id)
       .order("name", { ascending: true })
       .then(({ data }) => {
         const names = (data as KnownPlayer[] ?? []).map((p) => p.name);
         setKnownPlayers(names);
         if (names.length > 0) setAddingName(names[0]);
       });
-  }, []);
+  }, [activeGroup.id]);
 
   useEffect(() => {
     supabase
       .from("games")
       .select("*")
+      .eq("group_id", activeGroup.id)
       .eq("code", code)
       .single()
       .then(({ data, error }) => {
@@ -524,7 +528,7 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
       if (copyResetTimeoutRef.current) clearTimeout(copyResetTimeoutRef.current);
       supabase.removeChannel(channel);
     };
-  }, [code, applyGame]);
+  }, [code, applyGame, activeGroup.id]);
 
   function handlePasswordUnlock(input: string) {
     if (input === passwordRef.current) {
@@ -670,7 +674,7 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
   }
 
   async function copyGameLink() {
-    const gameUrl = `${window.location.origin}/game/${code}`;
+    const gameUrl = `${window.location.origin}/join/${activeGroup.invite_code}?next=/game/${code}`;
     try {
       await navigator.clipboard.writeText(gameUrl);
       setHasCopiedLink(true);
@@ -734,7 +738,7 @@ export default function GamePage({ params }: { params: Promise<{ code: string }>
     );
   }
 
-  const gameUrl = typeof window !== "undefined" ? `${window.location.origin}/game/${code}` : "";
+  const gameUrl = typeof window !== "undefined" ? `${window.location.origin}/join/${activeGroup.invite_code}?next=/game/${code}` : "";
   const totalChipsOut = game.players.reduce((s, p) => s + Number(p.chips || 0), 0);
   const totalPotValue = game.players.reduce((s, p) => s + p.buyIns * game.buy_in, 0);
   const chipsUnbalanced = canSettle && totalChipsOut !== totalPotValue;

@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 import { isTestEnvironment, type GameRow } from "@/lib/game";
 import { type Player } from "@/lib/types";
 import BottomNav from "@/components/BottomNav";
+import { useActiveGroup } from "@/lib/groups";
 import { CumulativeChart, RadarChart } from "@/components/StatCharts";
 import {
   computePlayerStats,
@@ -79,6 +80,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 export default function StatsPage() {
   const router = useRouter();
+  const activeGroup = useActiveGroup();
   const [returnTo] = useState<string | null>(() => {
     if (typeof window === "undefined") return null;
     return new URLSearchParams(window.location.search).get("returnTo");
@@ -94,6 +96,7 @@ export default function StatsPage() {
     supabase
       .from("games")
       .select("*")
+      .eq("group_id", activeGroup.id)
       .eq("settled", true)
       .eq("is_test", isTestEnvironment())
       .order("created_at", { ascending: false })
@@ -101,7 +104,7 @@ export default function StatsPage() {
         setAllGames((data as GameRow[]) ?? []);
         setLoading(false);
       });
-  }, []);
+  }, [activeGroup.id]);
 
   const games = useMemo(() => (
     dateFilter === "30d"

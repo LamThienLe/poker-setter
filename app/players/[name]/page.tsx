@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 import { isTestEnvironment, type GameRow } from "@/lib/game";
 import { type Player } from "@/lib/types";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
+import { useActiveGroup } from "@/lib/groups";
 
 
 const BG = "#F5F0E8";
@@ -54,6 +55,7 @@ function computeStreak(sessions: SessionResult[]): { type: "win" | "loss" | null
 export default function PlayerProfilePage() {
   const params = useParams();
   const router = useRouter();
+  const activeGroup = useActiveGroup();
   const name = decodeURIComponent(params.name as string);
 
   const [sessions, setSessions] = useState<SessionResult[]>([]);
@@ -63,6 +65,7 @@ export default function PlayerProfilePage() {
     supabase
       .from("games")
       .select("*")
+      .eq("group_id", activeGroup.id)
       .eq("settled", true)
       .eq("is_test", isTestEnvironment())
       .order("created_at", { ascending: false })
@@ -91,7 +94,7 @@ export default function PlayerProfilePage() {
         setSessions(results);
         setLoading(false);
       });
-  }, [name]);
+  }, [name, activeGroup.id]);
 
   const totalNet = sessions.reduce((s, r) => s + r.net, 0);
   const wins = sessions.filter((s) => s.net > 0).length;

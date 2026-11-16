@@ -1,6 +1,23 @@
 # Progress
 
-## 2026-10-24 (latest)
+## 2026-11-16 (latest)
+- Multi-group support: every game and known player belongs to a group, and
+  row level security only exposes a group's rows to its members
+- Devices sign in anonymously (Supabase anonymous auth), then join a group by
+  invite code via `join_group`, or start one via `create_group`; both are
+  `security definer` functions, so clients cannot write membership rows
+- New: `lib/groups.tsx` (provider + gate), `components/GroupBar.tsx` (switcher
+  and invite link on home), `/join/[inviteCode]?next=` route
+- Game share link/QR is now `/join/<invite>?next=/game/<code>`, so opening it
+  joins the group and lands in the game
+- `supabase-setup.sql` rewritten: adds groups, group_members, group_id on
+  games and known_players, moves old rows into "Original crew", replaces the
+  open policies. Must be run together with the deploy, and anonymous sign-ins
+  must be enabled in Supabase Auth first
+- Clearing browser storage loses the anonymous login, so that device has to
+  rejoin with the invite code
+
+## 2026-10-24
 - Anyone in a game can now edit any player's rebuys and chips, not just
   their own row (identity claim still used for "Playing as X")
 
