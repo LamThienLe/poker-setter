@@ -7,6 +7,8 @@ import { supabase } from "@/lib/supabase";
 import { generateGameCode, isTestEnvironment, type GameRow } from "@/lib/game";
 import { ArrowRightCircleIcon, LockClosedIcon } from "@heroicons/react/24/outline";
 import BottomNav from "@/components/BottomNav";
+import GroupBar from "@/components/GroupBar";
+import { useActiveGroup } from "@/lib/groups";
 
 
 const TAGLINES = [
@@ -73,6 +75,7 @@ function formatDate(iso: string) {
 
 export default function Home() {
   const router = useRouter();
+  const activeGroup = useActiveGroup();
   const [activeGames, setActiveGames] = useState<GameRow[]>([]);
   const [loadingGames, setLoadingGames] = useState(true);
   const [selected, setSelected] = useState<number>(200);
@@ -84,6 +87,7 @@ export default function Home() {
     supabase
       .from("games")
       .select("*")
+      .eq("group_id", activeGroup.id)
       .eq("settled", false)
       .eq("is_test", isTestEnvironment())
       .order("created_at", { ascending: false })
@@ -91,7 +95,7 @@ export default function Home() {
         setActiveGames((data as GameRow[]) ?? []);
         setLoadingGames(false);
       });
-  }, []);
+  }, [activeGroup.id]);
 
   async function handleCreate() {
     setCreating(true);
@@ -100,6 +104,7 @@ export default function Home() {
     const finalTitle = title.trim() || `Poker Night – ${gameDate}`;
     await supabase.from("games").insert({
       code,
+      group_id: activeGroup.id,
       buy_in: selected,
       players: [],
       settled: false,
@@ -133,6 +138,8 @@ export default function Home() {
           <AnimatedTagline />
         </div>
       </div>
+
+      <GroupBar />
 
       {/* Active games */}
       {!loadingGames && activeGames.length > 0 && (

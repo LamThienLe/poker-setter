@@ -12,3 +12,10 @@ export interface KnownPlayer {
   id: number;
   name: string;
 }
+
+
+export interface Group {
+  id: string;
+  name: string;
+  invite_code: string;
+}

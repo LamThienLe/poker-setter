@@ -5,12 +5,14 @@ import { supabase } from "@/lib/supabase";
 import { type KnownPlayer } from "@/lib/types";
 import { TrashIcon, PlusIcon } from "@heroicons/react/24/outline";
 import BottomNav from "@/components/BottomNav";
+import { useActiveGroup } from "@/lib/groups";
 
 
 const BG = "#F5F0E8";
 
 
 export default function PlayersPage() {
+  const activeGroup = useActiveGroup();
   const [players, setPlayers] = useState<KnownPlayer[]>([]);
   const [loading, setLoading] = useState(true);
   const [newName, setNewName] = useState("");
@@ -20,12 +22,13 @@ export default function PlayersPage() {
     supabase
       .from("known_players")
       .select("*")
+      .eq("group_id", activeGroup.id)
       .order("name", { ascending: true })
       .then(({ data }) => {
         setPlayers((data as KnownPlayer[]) ?? []);
         setLoading(false);
       });
-  }, []);
+  }, [activeGroup.id]);
 
   async function addPlayer() {
     const name = newName.trim();
@@ -37,7 +40,7 @@ export default function PlayersPage() {
     setAdding(true);
     const { data, error } = await supabase
       .from("known_players")
-      .insert({ name })
+      .insert({ name, group_id: activeGroup.id })
       .select()
       .single();
     if (!error && data) {

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { GroupProvider } from "@/lib/groups";
 
 export const metadata: Metadata = {
   title: "Poker Settler",
@@ -20,7 +21,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="h-full">
-      <body className="min-h-full">{children}</body>
+      <body className="min-h-full">
+        <GroupProvider>{children}</GroupProvider>
+      </body>
     </html>
   );
 }
