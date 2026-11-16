@@ -7,7 +7,6 @@ import { supabase } from "@/lib/supabase";
 import { generateGameCode, isTestEnvironment, type GameRow } from "@/lib/game";
 import { ArrowRightCircleIcon, LockClosedIcon } from "@heroicons/react/24/outline";
 import BottomNav from "@/components/BottomNav";
-import GroupBar from "@/components/GroupBar";
 import { useActiveGroup } from "@/lib/groups";
 
 
@@ -138,8 +137,6 @@ export default function Home() {
           <AnimatedTagline />
         </div>
       </div>
-
-      <GroupBar />
 
       {/* Active games */}
       {!loadingGames && activeGames.length > 0 && (

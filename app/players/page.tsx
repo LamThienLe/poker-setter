@@ -5,7 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { type KnownPlayer } from "@/lib/types";
 import { TrashIcon, PlusIcon } from "@heroicons/react/24/outline";
 import BottomNav from "@/components/BottomNav";
-import { useActiveGroup } from "@/lib/groups";
+import { useActiveGroup, useGroups } from "@/lib/groups";
 
 
 const BG = "#F5F0E8";
@@ -13,6 +13,7 @@ const BG = "#F5F0E8";
 
 export default function PlayersPage() {
   const activeGroup = useActiveGroup();
+  const { leaveGroup } = useGroups();
   const [players, setPlayers] = useState<KnownPlayer[]>([]);
   const [loading, setLoading] = useState(true);
   const [newName, setNewName] = useState("");
@@ -102,6 +103,13 @@ export default function PlayersPage() {
           ))}
         </div>
       )}
+
+      <button
+        onClick={() => { if (window.confirm(`Leave ${activeGroup.name} on this device?`)) leaveGroup(); }}
+        className="mt-8 w-full text-xs font-black uppercase tracking-widest text-black/40 underline"
+      >
+        Leave {activeGroup.name}
+      </button>
 
       <BottomNav active="players" gameCode={null} />
     </main>
